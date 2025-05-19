@@ -51,6 +51,10 @@ class EventosInfantilesApp extends StatelessWidget {
         '/login': (context) => const LoginPantalla(),
         '/dashboard': (context) => const DashboardPantalla(),
         '/nueva-reserva': (context) => const NuevaReservaPantalla(),
+        '/editar-reserva': (context) {
+          final settings = ModalRoute.of(context)!.settings;
+          return NuevaReservaPantalla.fromRouteSettings(settings);
+        },
         '/stock': (context) => const StockPantalla(),
         '/configuracion': (context) => const ConfiguracionPantalla(),
       },

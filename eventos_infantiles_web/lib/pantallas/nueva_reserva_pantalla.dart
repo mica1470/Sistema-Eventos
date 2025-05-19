@@ -2,7 +2,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class NuevaReservaPantalla extends StatefulWidget {
-  const NuevaReservaPantalla({super.key});
+  final Map<String, dynamic>? reservaExistente;
+  final String? reservaId;
+
+  const NuevaReservaPantalla(
+      {super.key, this.reservaExistente, this.reservaId});
+
+  // Cambiamos la forma de obtener argumentos si vienen por Navigator.pushNamed
+  factory NuevaReservaPantalla.fromRouteSettings(RouteSettings settings) {
+    final args = settings.arguments as Map<String, dynamic>?;
+    return NuevaReservaPantalla(
+      reservaId: args != null ? args['reservaId'] as String? : null,
+      reservaExistente:
+          args != null ? args['reservaDatos'] as Map<String, dynamic>? : null,
+    );
+  }
 
   @override
   State<NuevaReservaPantalla> createState() => _NuevaReservaPantallaState();
@@ -22,15 +36,50 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
 
   bool cargando = false;
 
+  @override
+  void initState() {
+    super.initState();
+    if (widget.reservaExistente != null) {
+      final r = widget.reservaExistente!;
+      clienteController.text = r['cliente'] ?? '';
+      telefonoController.text = r['telefono'] ?? '';
+      observacionesController.text = r['observaciones'] ?? '';
+      combo = r['combo'] ?? 'TRUGUITO';
+      estadoPago = r['estadoPago'] ?? 'pendiente';
+
+      final fechaStr = r['fecha'] ?? '';
+      fecha = DateTime.tryParse(fechaStr);
+
+      if (fecha != null) {
+        horaInicio = TimeOfDay(hour: fecha!.hour, minute: fecha!.minute);
+      }
+
+      final horaFinStr = r['horaFin'] ?? '00:00';
+      final partes = horaFinStr.split(':');
+      if (partes.length == 2) {
+        horaFin = TimeOfDay(
+          hour: int.tryParse(partes[0]) ?? 0,
+          minute: int.tryParse(partes[1]) ?? 0,
+        );
+      }
+    }
+  }
+
   Future<void> guardarReserva() async {
     if (!formKey.currentState!.validate() ||
         fecha == null ||
         horaInicio == null ||
-        horaFin == null) return;
+        horaFin == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, complete todos los campos')),
+      );
+      return;
+    }
 
     setState(() => cargando = true);
 
     try {
+      // Creamos un DateTime combinando fecha con horaInicio
       final fechaEvento = DateTime(
         fecha!.year,
         fecha!.month,
@@ -39,16 +88,29 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
         horaInicio!.minute,
       );
 
-      await FirebaseFirestore.instance.collection('reservas').add({
+      final datosReserva = {
         'cliente': clienteController.text.trim(),
         'telefono': telefonoController.text.trim(),
         'combo': combo,
         'estadoPago': estadoPago,
         'fecha': fechaEvento.toIso8601String(),
-        'horaFin': '${horaFin!.hour}:${horaFin!.minute}',
+        'horaFin':
+            '${horaFin!.hour.toString().padLeft(2, '0')}:${horaFin!.minute.toString().padLeft(2, '0')}',
         'observaciones': observacionesController.text.trim(),
-        'creado': FieldValue.serverTimestamp(),
-      });
+      };
+
+      final reservasRef = FirebaseFirestore.instance.collection('reservas');
+
+      if (widget.reservaId != null) {
+        // Para edición usamos update (solo modifica los campos enviados)
+        await reservasRef.doc(widget.reservaId).update(datosReserva);
+      } else {
+        // Si es nuevo, agregamos y también guardamos el timestamp creado
+        await reservasRef.add({
+          ...datosReserva,
+          'creado': FieldValue.serverTimestamp(),
+        });
+      }
 
       if (!mounted) return;
       Navigator.pop(context);
@@ -64,7 +126,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
   Future<void> seleccionarFecha() async {
     final seleccion = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: fecha ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
@@ -72,21 +134,27 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
   }
 
   Future<void> seleccionarHoraInicio() async {
-    final seleccion =
-        await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    final seleccion = await showTimePicker(
+      context: context,
+      initialTime: horaInicio ?? TimeOfDay.now(),
+    );
     if (seleccion != null) setState(() => horaInicio = seleccion);
   }
 
   Future<void> seleccionarHoraFin() async {
-    final seleccion =
-        await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    final seleccion = await showTimePicker(
+      context: context,
+      initialTime: horaFin ?? TimeOfDay.now(),
+    );
     if (seleccion != null) setState(() => horaFin = seleccion);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Nueva Reserva')),
+      appBar: AppBar(
+          title: Text(
+              widget.reservaId != null ? 'Editar Reserva' : 'Nueva Reserva')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -111,6 +179,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                     ? 'Hora Fin'
                     : 'Fin: ${horaFin!.format(context)}'),
               ),
+              const SizedBox(height: 12),
               TextFormField(
                 controller: clienteController,
                 decoration:
@@ -147,7 +216,9 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                   ? const CircularProgressIndicator()
                   : ElevatedButton(
                       onPressed: guardarReserva,
-                      child: const Text('Guardar Reserva'),
+                      child: Text(widget.reservaId != null
+                          ? 'Guardar Cambios'
+                          : 'Guardar Reserva'),
                     ),
             ],
           ),
