@@ -8,7 +8,6 @@ class NuevaReservaPantalla extends StatefulWidget {
   const NuevaReservaPantalla(
       {super.key, this.reservaExistente, this.reservaId});
 
-  // Cambiamos la forma de obtener argumentos si vienen por Navigator.pushNamed
   factory NuevaReservaPantalla.fromRouteSettings(RouteSettings settings) {
     final args = settings.arguments as Map<String, dynamic>?;
     return NuevaReservaPantalla(
@@ -31,21 +30,22 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
   DateTime? fecha;
   TimeOfDay? horaInicio;
   TimeOfDay? horaFin;
-  String combo = 'TRUGUITO';
-  String estadoPago = 'pendiente';
+  String combo = 'SIMPLE';
+  String estadoPago = 'Pendiente';
 
   bool cargando = false;
 
   @override
   void initState() {
     super.initState();
+
     if (widget.reservaExistente != null) {
       final r = widget.reservaExistente!;
       clienteController.text = r['cliente'] ?? '';
       telefonoController.text = r['telefono'] ?? '';
       observacionesController.text = r['observaciones'] ?? '';
-      combo = r['combo'] ?? 'TRUGUITO';
-      estadoPago = r['estadoPago'] ?? 'pendiente';
+      combo = r['combo'] ?? 'SIMPLE';
+      estadoPago = r['estadoPago'] ?? 'Pendiente';
 
       final fechaStr = r['fecha'] ?? '';
       fecha = DateTime.tryParse(fechaStr);
@@ -76,24 +76,29 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
       return;
     }
 
+    final fechaInicioDT = DateTime(fecha!.year, fecha!.month, fecha!.day,
+        horaInicio!.hour, horaInicio!.minute);
+    final fechaFinDT = DateTime(
+        fecha!.year, fecha!.month, fecha!.day, horaFin!.hour, horaFin!.minute);
+
+    if (!fechaFinDT.isAfter(fechaInicioDT)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content:
+                Text('La hora de fin debe ser posterior a la hora de inicio')),
+      );
+      return;
+    }
+
     setState(() => cargando = true);
 
     try {
-      // Creamos un DateTime combinando fecha con horaInicio
-      final fechaEvento = DateTime(
-        fecha!.year,
-        fecha!.month,
-        fecha!.day,
-        horaInicio!.hour,
-        horaInicio!.minute,
-      );
-
       final datosReserva = {
         'cliente': clienteController.text.trim(),
         'telefono': telefonoController.text.trim(),
         'combo': combo,
         'estadoPago': estadoPago,
-        'fecha': fechaEvento.toIso8601String(),
+        'fecha': fechaInicioDT.toIso8601String(),
         'horaFin':
             '${horaFin!.hour.toString().padLeft(2, '0')}:${horaFin!.minute.toString().padLeft(2, '0')}',
         'observaciones': observacionesController.text.trim(),
@@ -102,10 +107,8 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
       final reservasRef = FirebaseFirestore.instance.collection('reservas');
 
       if (widget.reservaId != null) {
-        // Para edición usamos update (solo modifica los campos enviados)
         await reservasRef.doc(widget.reservaId).update(datosReserva);
       } else {
-        // Si es nuevo, agregamos y también guardamos el timestamp creado
         await reservasRef.add({
           ...datosReserva,
           'creado': FieldValue.serverTimestamp(),
@@ -192,7 +195,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
               ),
               DropdownButtonFormField<String>(
                 value: combo,
-                items: ['TRUGUITO', 'SIMPLE', 'COMPLETO']
+                items: ['COMBINADO', 'SIMPLE', 'COMPLETO']
                     .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                     .toList(),
                 onChanged: (val) => setState(() => combo = val!),
@@ -200,7 +203,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
               ),
               DropdownButtonFormField<String>(
                 value: estadoPago,
-                items: ['pendiente', 'confirmado']
+                items: ['Pendiente', 'Confirmado']
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                     .toList(),
                 onChanged: (val) => setState(() => estadoPago = val!),
@@ -217,8 +220,8 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                   : ElevatedButton(
                       onPressed: guardarReserva,
                       child: Text(widget.reservaId != null
-                          ? 'Guardar Cambios'
-                          : 'Guardar Reserva'),
+                          ? 'Actualizar Reserva'
+                          : 'Crear Reserva'),
                     ),
             ],
           ),
