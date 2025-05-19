@@ -163,24 +163,56 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
         child: Form(
           key: formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ElevatedButton(
-                onPressed: seleccionarFecha,
-                child: Text(fecha == null
-                    ? 'Seleccionar Fecha'
-                    : 'Fecha: ${fecha!.day}/${fecha!.month}/${fecha!.year}'),
-              ),
-              ElevatedButton(
-                onPressed: seleccionarHoraInicio,
-                child: Text(horaInicio == null
-                    ? 'Hora Inicio'
-                    : 'Inicio: ${horaInicio!.format(context)}'),
-              ),
-              ElevatedButton(
-                onPressed: seleccionarHoraFin,
-                child: Text(horaFin == null
-                    ? 'Hora Fin'
-                    : 'Fin: ${horaFin!.format(context)}'),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final esEscritorio = constraints.maxWidth > 600;
+                  final botones = [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: seleccionarFecha,
+                        child: Text(fecha == null
+                            ? 'Seleccionar Fecha'
+                            : 'Fecha: ${fecha!.day}/${fecha!.month}/${fecha!.year}'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: seleccionarHoraInicio,
+                        child: Text(horaInicio == null
+                            ? 'Hora Inicio'
+                            : 'Inicio: ${horaInicio!.format(context)}'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: seleccionarHoraFin,
+                        child: Text(horaFin == null
+                            ? 'Hora Fin'
+                            : 'Fin: ${horaFin!.format(context)}'),
+                      ),
+                    ),
+                  ];
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 24),
+                    child: esEscritorio
+                        ? Row(children: botones)
+                        : Column(
+                            children: botones
+                                .where((widget) => widget is! SizedBox)
+                                .map((widget) => Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 12),
+                                      child: widget,
+                                    ))
+                                .toList(),
+                          ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -189,10 +221,12 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                     const InputDecoration(labelText: 'Nombre del Cliente'),
                 validator: (val) => val!.isEmpty ? 'Requerido' : null,
               ),
+              const SizedBox(height: 24),
               TextFormField(
                 controller: telefonoController,
                 decoration: const InputDecoration(labelText: 'Teléfono'),
               ),
+              const SizedBox(height: 24),
               DropdownButtonFormField<String>(
                 value: combo,
                 items: ['COMBINADO', 'SIMPLE', 'COMPLETO']
@@ -201,6 +235,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                 onChanged: (val) => setState(() => combo = val!),
                 decoration: const InputDecoration(labelText: 'Combo'),
               ),
+              const SizedBox(height: 24),
               DropdownButtonFormField<String>(
                 value: estadoPago,
                 items: ['Pendiente', 'Confirmado']
@@ -209,20 +244,27 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                 onChanged: (val) => setState(() => estadoPago = val!),
                 decoration: const InputDecoration(labelText: 'Estado de pago'),
               ),
+              const SizedBox(height: 24),
               TextFormField(
                 controller: observacionesController,
                 decoration: const InputDecoration(labelText: 'Observaciones'),
                 maxLines: 3,
               ),
-              const SizedBox(height: 24),
-              cargando
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: guardarReserva,
-                      child: Text(widget.reservaId != null
-                          ? 'Actualizar Reserva'
-                          : 'Crear Reserva'),
-                    ),
+              const SizedBox(height: 36),
+              Center(
+                child: cargando
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                        onPressed: guardarReserva,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 40, vertical: 16),
+                        ),
+                        child: Text(widget.reservaId != null
+                            ? 'Actualizar Reserva'
+                            : 'Crear Reserva'),
+                      ),
+              ),
             ],
           ),
         ),
