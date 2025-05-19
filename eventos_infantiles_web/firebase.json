@@ -1,0 +1,39 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "eventos-infantiles",
+          "appId": "1:649989230963:android:bbb80fb27810ce7e08b506",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "eventos-infantiles",
+          "configurations": {
+            "android": "1:649989230963:android:bbb80fb27810ce7e08b506",
+            "ios": "1:649989230963:ios:4d4df769a7d2ba3d08b506",
+            "macos": "1:649989230963:ios:4d4df769a7d2ba3d08b506",
+            "web": "1:649989230963:web:d1b9c2640b04437208b506",
+            "windows": "1:649989230963:web:6ddc60bf2149aaa508b506"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

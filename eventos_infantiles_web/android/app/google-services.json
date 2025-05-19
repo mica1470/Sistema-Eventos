@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "649989230963",
+    "project_id": "eventos-infantiles",
+    "storage_bucket": "eventos-infantiles.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:649989230963:android:bbb80fb27810ce7e08b506",
+        "android_client_info": {
+          "package_name": "com.example.eventos_infantiles_web"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDP1MMGwyTsmX5T3hfDpU_XgGYCi_nyrFE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
