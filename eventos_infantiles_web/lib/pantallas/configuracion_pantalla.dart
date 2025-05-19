@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class ConfiguracionPantalla extends StatefulWidget {
   const ConfiguracionPantalla({super.key});
@@ -10,6 +12,8 @@ class ConfiguracionPantalla extends StatefulWidget {
 
 class _ConfiguracionPantallaState extends State<ConfiguracionPantalla> {
   final TextEditingController tokenController = TextEditingController();
+  final TextEditingController mensajePersonalizadoController =
+      TextEditingController();
   final TextEditingController textoRecordatorioController =
       TextEditingController();
   TimeOfDay horaEnvio = const TimeOfDay(hour: 9, minute: 0);
@@ -34,14 +38,12 @@ class _ConfiguracionPantallaState extends State<ConfiguracionPantalla> {
         .collection('configuracion')
         .doc('bot')
         .get();
-
     if (doc.exists) {
       final data = doc.data()!;
       tokenController.text = data['token'] ?? '';
       textoRecordatorioController.text = data['textoRecordatorio'] ?? '';
       if (data['horaEnvio'] != null) {
-        final hora = data['horaEnvio'] as String;
-        final partes = hora.split(':');
+        final partes = (data['horaEnvio'] as String).split(':');
         if (partes.length == 2) {
           horaEnvio = TimeOfDay(
               hour: int.parse(partes[0]), minute: int.parse(partes[1]));
@@ -77,11 +79,40 @@ class _ConfiguracionPantallaState extends State<ConfiguracionPantalla> {
     }
   }
 
-  void probarEnvio() {
-    // Aquí agregar la lógica para probar el envío (opcional)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Prueba de envío ejecutada')),
+  Future<void> probarEnvio() async {
+    final accountSid = 'AC2d7b0cbd60a938acbf133a2e2382bce5';
+    final authToken = tokenController.text.trim();
+    final mensaje = mensajePersonalizadoController.text.trim().isNotEmpty
+        ? mensajePersonalizadoController.text.trim()
+        : textoRecordatorioController.text.trim();
+
+    final uri = Uri.parse(
+        'https://api.twilio.com/2010-04-01/Accounts/$accountSid/Messages.json');
+    final basicAuth =
+        'Basic ${base64Encode(utf8.encode('$accountSid:$authToken'))}';
+
+    final response = await http.post(
+      uri,
+      headers: {
+        'Authorization': basicAuth,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: {
+        'To': 'whatsapp:+5493884470452',
+        'From': 'whatsapp:+14155238886',
+        'Body': mensaje,
+      },
     );
+
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Mensaje enviado con éxito')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al enviar: ${response.body}')),
+      );
+    }
   }
 
   @override
@@ -95,12 +126,15 @@ class _ConfiguracionPantallaState extends State<ConfiguracionPantalla> {
             TextField(
               controller: tokenController,
               decoration: const InputDecoration(labelText: 'Token / API Key'),
+              obscureText: true, // 🔒 oculta el token como una contraseña
             ),
             const SizedBox(height: 16),
             TextField(
-              controller: textoRecordatorioController,
-              decoration:
-                  const InputDecoration(labelText: 'Texto del recordatorio'),
+              controller: mensajePersonalizadoController,
+              decoration: const InputDecoration(
+                labelText: 'Mensaje personalizado (solo para prueba)',
+                hintText: 'Este mensaje se enviará si lo completás',
+              ),
               maxLines: 3,
             ),
             const SizedBox(height: 16),

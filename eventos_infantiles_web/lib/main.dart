@@ -6,6 +6,7 @@ import 'pantallas/dashboard_pantalla.dart'; // nuevo import
 import 'firebase_options.dart';
 import 'pantallas/nueva_reserva_pantalla.dart'; // nuevo import
 import 'pantallas/stock_pantalla.dart';
+import 'pantallas/recordatorios_pantalla.dart';
 import 'pantallas/configuracion_pantalla.dart';
 
 void main() async {
@@ -55,6 +56,7 @@ class EventosInfantilesApp extends StatelessWidget {
           final settings = ModalRoute.of(context)!.settings;
           return NuevaReservaPantalla.fromRouteSettings(settings);
         },
+        '/recordatorios': (context) => RecordatoriosPantalla(),
         '/stock': (context) => const StockPantalla(),
         '/configuracion': (context) => const ConfiguracionPantalla(),
       },

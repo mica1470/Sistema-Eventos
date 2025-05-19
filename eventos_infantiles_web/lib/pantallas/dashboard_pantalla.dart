@@ -11,6 +11,10 @@ class DashboardPantalla extends StatefulWidget {
 class _DashboardPantallaState extends State<DashboardPantalla> {
   bool mostrarTodasLasReservas = false;
   bool mostrarTodoElStock = false;
+  String filtroReservas = 'Recientes'; // O 'Próximas a vencer'
+
+  // Contador de reservas próximas a vencer en 3 días
+  int reservasProximasAVencer = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -30,15 +34,88 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Eventos Infantiles')),
+      appBar: AppBar(
+        title: const Text('Eventos Infantiles'),
+        actions: [
+          // StreamBuilder para contar reservas próximas a vencer en 3 días
+          StreamBuilder<QuerySnapshot>(
+            stream:
+                FirebaseFirestore.instance.collection('reservas').snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const SizedBox(); // nada mientras carga
+              }
+
+              final hoy = DateTime.now();
+              final tresDiasDespues = hoy.add(const Duration(days: 3));
+
+              final reservas = snapshot.data!.docs;
+
+              // Filtrar reservas con fecha dentro de los próximos 3 días
+              final proximasAVencer = reservas.where((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                final fechaStr = data['fecha'] ?? '';
+                DateTime? fecha = DateTime.tryParse(fechaStr);
+                if (fecha == null) return false;
+                // La reserva vence si la fecha está entre hoy y 3 días adelante (inclusive)
+                return fecha.isAfter(hoy.subtract(const Duration(days: 1))) &&
+                    fecha
+                        .isBefore(tresDiasDespues.add(const Duration(days: 1)));
+              }).length;
+
+              if (proximasAVencer == 0) return const SizedBox();
+
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications),
+                    onPressed: () {
+                      // Navegar a la pantalla de recordatorios o mostrar diálogo
+                      Navigator.pushNamed(context, '/recordatorios');
+                    },
+                  ),
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 20,
+                        minHeight: 20,
+                      ),
+                      child: Text(
+                        '$proximasAVencer',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
             const DrawerHeader(
-              decoration: BoxDecoration(color: Colors.purple),
+              decoration:
+                  BoxDecoration(color: Color.fromARGB(129, 214, 165, 223)),
               child: Text('Menú',
-                  style: TextStyle(color: Colors.white, fontSize: 24)),
+                  style: TextStyle(
+                      color: Color.fromARGB(255, 51, 46, 46), fontSize: 24)),
             ),
             ListTile(
               leading: const Icon(Icons.add_box),
@@ -49,19 +126,26 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Configuración'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/configuracion');
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.inventory),
               title: const Text('Stock'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/stock');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.notifications),
+              title: const Text('Recordatorios'),
+              onTap: () {
+                Navigator.pushNamed(context, '/recordatorios');
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text('Configuración'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/configuracion');
               },
             ),
           ],
