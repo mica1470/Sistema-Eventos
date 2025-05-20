@@ -168,46 +168,84 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
               LayoutBuilder(
                 builder: (context, constraints) {
                   final esEscritorio = constraints.maxWidth > 600;
+
+                  Widget buildBoton({
+                    required VoidCallback onPressed,
+                    required IconData icono,
+                    required String texto,
+                    required bool invalido,
+                  }) {
+                    return ElevatedButton.icon(
+                      onPressed: onPressed,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: invalido
+                            ? Theme.of(context)
+                                .colorScheme
+                                .error
+                                .withOpacity(0.1)
+                            : Theme.of(context).colorScheme.primary,
+                        foregroundColor: invalido
+                            ? Theme.of(context).colorScheme.error
+                            : Colors.white,
+                        side: invalido
+                            ? BorderSide(
+                                color: Theme.of(context).colorScheme.error,
+                                width: 2)
+                            : null,
+                        minimumSize: const Size.fromHeight(50),
+                      ),
+                      icon: Icon(icono),
+                      label: Text(texto),
+                    );
+                  }
+
                   final botones = [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: seleccionarFecha,
-                        child: Text(fecha == null
-                            ? 'Seleccionar Fecha'
-                            : 'Fecha: ${fecha!.day}/${fecha!.month}/${fecha!.year}'),
-                      ),
+                    buildBoton(
+                      onPressed: seleccionarFecha,
+                      icono: Icons.calendar_today,
+                      texto: fecha == null
+                          ? 'Seleccionar Fecha'
+                          : 'Fecha: ${fecha!.day}/${fecha!.month}/${fecha!.year}',
+                      invalido: fecha == null,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: seleccionarHoraInicio,
-                        child: Text(horaInicio == null
-                            ? 'Hora Inicio'
-                            : 'Inicio: ${horaInicio!.format(context)}'),
-                      ),
+                    buildBoton(
+                      onPressed: seleccionarHoraInicio,
+                      icono: Icons.access_time,
+                      texto: horaInicio == null
+                          ? 'Hora Inicio'
+                          : 'Inicio: ${horaInicio!.format(context)}',
+                      invalido: horaInicio == null,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: seleccionarHoraFin,
-                        child: Text(horaFin == null
-                            ? 'Hora Fin'
-                            : 'Fin: ${horaFin!.format(context)}'),
-                      ),
+                    buildBoton(
+                      onPressed: seleccionarHoraFin,
+                      icono: Icons.access_time_filled,
+                      texto: horaFin == null
+                          ? 'Hora Fin'
+                          : 'Fin: ${horaFin!.format(context)}',
+                      invalido: horaFin == null,
                     ),
                   ];
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 24),
                     child: esEscritorio
-                        ? Row(children: botones)
+                        ? Row(
+                            children: botones
+                                .map((b) => Expanded(
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 6),
+                                        child: b,
+                                      ),
+                                    ))
+                                .toList(),
+                          )
                         : Column(
                             children: botones
-                                .where((widget) => widget is! SizedBox)
-                                .map((widget) => Padding(
+                                .map((b) => Padding(
                                       padding:
-                                          const EdgeInsets.only(bottom: 12),
-                                      child: widget,
+                                          const EdgeInsets.only(bottom: 16),
+                                      child: b,
                                     ))
                                 .toList(),
                           ),
