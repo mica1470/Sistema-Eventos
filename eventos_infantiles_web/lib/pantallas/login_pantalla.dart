@@ -34,8 +34,9 @@ class _LoginPantallaState extends State<LoginPantalla> {
       );
 
       // Navegar al Dashboard
-      if (!mounted)
+      if (!mounted) {
         return; // para evitar errores si el widget ya no está en pantalla
+      }
       Navigator.of(context).pushReplacementNamed('/dashboard');
     } on FirebaseAuthException catch (e) {
       setState(() {

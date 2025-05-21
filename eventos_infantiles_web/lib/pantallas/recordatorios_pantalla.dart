@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 class RecordatoriosPantalla extends StatefulWidget {
-  const RecordatoriosPantalla({Key? key}) : super(key: key);
+  const RecordatoriosPantalla({super.key});
 
   @override
   State<RecordatoriosPantalla> createState() => _RecordatoriosPantallaState();
@@ -15,18 +15,19 @@ class _RecordatoriosPantallaState extends State<RecordatoriosPantalla> {
   @override
   Widget build(BuildContext context) {
     final hoy = DateTime.now();
-    final enTresDias = hoy.add(Duration(days: 3));
+    final enTresDias = hoy.add(const Duration(days: 3));
 
     return Scaffold(
-      appBar: AppBar(title: Text('Recordatorios')),
+      appBar: AppBar(title: const Text('Recordatorios')),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('reservas')
             .orderBy('fecha') // debe estar en formato ISO
             .snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData)
-            return Center(child: CircularProgressIndicator());
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
           final reservasFiltradas = snapshot.data!.docs.where((doc) {
             final data = doc.data() as Map<String, dynamic>;
@@ -40,7 +41,8 @@ class _RecordatoriosPantallaState extends State<RecordatoriosPantalla> {
           }).toList();
 
           if (reservasFiltradas.isEmpty) {
-            return Center(child: Text('No hay reservas próximas a vencer'));
+            return const Center(
+                child: Text('No hay reservas próximas a vencer'));
           }
 
           return ListView.builder(
@@ -53,17 +55,17 @@ class _RecordatoriosPantallaState extends State<RecordatoriosPantalla> {
               final estado = data['estadoPago'] ?? 'Sin estado';
 
               return Card(
-                margin: EdgeInsets.all(10),
+                margin: const EdgeInsets.all(10),
                 color: Colors.orange[100],
                 child: ListTile(
-                  leading: Icon(Icons.warning, color: Colors.deepOrange),
+                  leading: const Icon(Icons.warning, color: Colors.deepOrange),
                   title: Text(
                       'Reserva para ${data['cliente'] ?? 'Cliente desconocido'}'),
                   subtitle: Text(
                     'Fecha: ${DateFormat('dd/MM/yyyy – kk:mm').format(fecha)}\nEstado de pago: $estado\nCombo: $combo',
                   ),
                   trailing: IconButton(
-                    icon: Icon(Icons.close, color: Colors.red),
+                    icon: const Icon(Icons.close, color: Colors.red),
                     tooltip: 'Ocultar este recordatorio',
                     onPressed: () {
                       setState(() {

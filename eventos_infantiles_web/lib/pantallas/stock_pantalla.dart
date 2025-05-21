@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class StockPantalla extends StatelessWidget {
-  const StockPantalla({Key? key}) : super(key: key);
+  const StockPantalla({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +68,7 @@ class StockPantalla extends StatelessWidget {
 class StockDialog extends StatefulWidget {
   final DocumentSnapshot? doc;
 
-  const StockDialog({Key? key, this.doc}) : super(key: key);
+  const StockDialog({super.key, this.doc});
 
   @override
   State<StockDialog> createState() => _StockDialogState();

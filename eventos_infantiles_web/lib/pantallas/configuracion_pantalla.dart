@@ -80,7 +80,7 @@ class _ConfiguracionPantallaState extends State<ConfiguracionPantalla> {
   }
 
   Future<void> probarEnvio() async {
-    final accountSid = 'AC2d7b0cbd60a938acbf133a2e2382bce5';
+    const accountSid = 'AC2d7b0cbd60a938acbf133a2e2382bce5';
     final authToken = tokenController.text.trim();
     final mensaje = mensajePersonalizadoController.text.trim().isNotEmpty
         ? mensajePersonalizadoController.text.trim()
@@ -144,7 +144,7 @@ class _ConfiguracionPantallaState extends State<ConfiguracionPantalla> {
                 const SizedBox(width: 16),
                 TextButton(
                   onPressed: seleccionarHora,
-                  child: Text('${horaEnvio.format(context)}'),
+                  child: Text(horaEnvio.format(context)),
                 ),
               ],
             ),
