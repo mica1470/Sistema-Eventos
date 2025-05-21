@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'dart:html' as html;
 
 class DashboardPantalla extends StatefulWidget {
   const DashboardPantalla({super.key});
@@ -14,7 +16,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
   bool mostrarTodasLasReservas = false;
   bool mostrarTodoElStock = false;
   String filtroReservas = 'Recientes'; // O 'Próximas a vencer'
-
+  List<Map<String, dynamic>> reservasVisibles = [];
   // Contador de reservas próximas a vencer en 3 días
   int reservasProximasAVencer = 0;
 
@@ -37,7 +39,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Eventos Infantiles'),
+        title: const Text('Futuros Heroes'),
         actions: [
           // StreamBuilder para contar reservas próximas a vencer en 3 días
           StreamBuilder<QuerySnapshot>(
@@ -114,7 +116,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
           children: [
             const DrawerHeader(
               decoration:
-                  BoxDecoration(color: Color.fromARGB(129, 214, 165, 223)),
+                  BoxDecoration(color: Color.fromARGB(171, 247, 234, 125)),
               child: Text('Menú',
                   style: TextStyle(
                       color: Color.fromARGB(255, 51, 46, 46), fontSize: 24)),
@@ -144,8 +146,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.inventory),
-              title: const Text('Calendario'),
+              title: const Text('📅  Calendario'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/calendario');
@@ -176,25 +177,36 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('📅 Reservas', style: tituloStyle),
-              DropdownButton<String>(
-                value: filtroReservas,
-                items: const [
-                  DropdownMenuItem(
-                    value: 'Recientes',
-                    child: Text('Recientes'),
+              Row(
+                children: [
+                  DropdownButton<String>(
+                    value: filtroReservas,
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'Recientes',
+                        child: Text('Recientes'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Próximas a vencer',
+                        child: Text('Próximas a vencer'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          filtroReservas = value;
+                        });
+                      }
+                    },
                   ),
-                  DropdownMenuItem(
-                    value: 'Próximas a vencer',
-                    child: Text('Próximas a vencer'),
+                  IconButton(
+                    icon: const Icon(Icons.download),
+                    tooltip: 'Descargar reservas visibles en PDF',
+                    onPressed: reservasVisibles.isEmpty
+                        ? null
+                        : () => _generarPdf(reservasVisibles),
                   ),
                 ],
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      filtroReservas = value;
-                    });
-                  }
-                },
               ),
             ],
           ),
@@ -254,6 +266,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
           builder: (context, snapshot) {
             if (snapshot.hasError) return Text('Error: ${snapshot.error}');
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              reservasVisibles = [];
               return const Text('No hay reservas registradas');
             }
 
@@ -261,7 +274,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
             final fechaLimite = hoy.add(const Duration(days: 3));
             final reservasSinFiltrar = snapshot.data!.docs;
 
-            final reservas = reservasSinFiltrar.where((doc) {
+            final reservasFiltradas = reservasSinFiltrar.where((doc) {
               final data = doc.data() as Map<String, dynamic>;
               final dynamic fechaRaw = data['fecha'];
               DateTime? fecha;
@@ -285,10 +298,18 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               return true;
             }).toList();
 
+            // Actualizo la lista para el PDF:
+            reservasVisibles = reservasFiltradas.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              final Map<String, dynamic> copia = Map.from(data);
+              copia['id'] = doc.id;
+              return copia;
+            }).toList();
+
             return GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: reservas.length,
+              itemCount: reservasFiltradas.length,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: crossAxisCount,
                 childAspectRatio: 2.5,
@@ -296,7 +317,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                 mainAxisSpacing: 12,
               ),
               itemBuilder: (context, index) {
-                final data = reservas[index].data();
+                final data = reservasFiltradas[index].data();
                 if (data is! Map<String, dynamic>) {
                   return Card(
                     color: Colors.red.shade100,
@@ -307,10 +328,14 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                   );
                 }
                 final reserva = data;
-                final id = reservas[index].id;
-
+                final id = reservasFiltradas[index].id;
                 final dynamic fechaRaw = reserva['fecha'];
                 DateTime fecha;
+                final fechaReserva = reserva['fecha'] is Timestamp
+                    ? (reserva['fecha'] as Timestamp).toDate()
+                    : DateTime.tryParse(reserva['fecha']) ?? DateTime.now();
+
+                final horario = DateFormat.Hm().format(fechaReserva);
 
                 if (fechaRaw is Timestamp) {
                   fecha = fechaRaw.toDate();
@@ -325,7 +350,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                     _mostrarOpcionesReserva(context, id, reserva);
                   },
                   child: Card(
-                    color: Colors.blue[50],
+                    color: const Color.fromARGB(255, 203, 231, 252),
                     elevation: 4,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -341,6 +366,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                           Text(
                               'Fecha: ${fecha.day}/${fecha.month}/${fecha.year}',
                               style: textoStyle),
+                          Text('Horario: $horario', style: textoStyle),
                           Text('Combo: ${reserva['combo'] ?? ''}',
                               style: textoStyle),
                           Text(
@@ -359,6 +385,78 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
         );
       },
     );
+  }
+
+  Future<void> _generarPdf(List<Map<String, dynamic>> reservas) async {
+    final pdf = pw.Document();
+
+    final titulo = pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold);
+    final subtitulo =
+        pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold);
+    final normal = pw.TextStyle(fontSize: 14);
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        build: (context) {
+          return [
+            pw.Text('Listado de Reservas', style: titulo),
+            pw.SizedBox(height: 20),
+            ...reservas.map((reserva) {
+              DateTime fecha;
+              final dynamic fechaRaw = reserva['fecha'];
+              if (fechaRaw is Timestamp) {
+                fecha = fechaRaw.toDate();
+              } else if (fechaRaw is String) {
+                fecha = DateTime.tryParse(fechaRaw) ?? DateTime.now();
+              } else {
+                fecha = DateTime.now();
+              }
+              final fechaReserva = reserva['fecha'] is Timestamp
+                  ? (reserva['fecha'] as Timestamp).toDate()
+                  : DateTime.tryParse(reserva['fecha']) ?? DateTime.now();
+
+              final horario = DateFormat.Hm().format(fechaReserva);
+              return pw.Container(
+                margin: const pw.EdgeInsets.only(bottom: 12),
+                padding: const pw.EdgeInsets.all(12),
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.grey300),
+                  borderRadius: pw.BorderRadius.circular(8),
+                  color: PdfColors.blue50,
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text('Reserva ID: ${reserva['id'] ?? ''}',
+                        style: subtitulo),
+                    pw.SizedBox(height: 6),
+                    pw.Text('Cliente: ${reserva['cliente'] ?? ''}',
+                        style: normal),
+                    pw.Text('Fecha: ${fecha.day}/${fecha.month}/${fecha.year}',
+                        style: normal),
+                    pw.Text('Horario: $horario', style: normal),
+                    pw.Text('Combo: ${reserva['combo'] ?? ''}', style: normal),
+                    pw.Text(
+                        'Observaciones: ${reserva['observaciones'] ?? 'Ninguna'}',
+                        style: normal),
+                    pw.Text('Estado de pago: ${reserva['estadoPago'] ?? ''}',
+                        style: normal),
+                  ],
+                ),
+              );
+            }).toList(),
+          ];
+        },
+      ),
+    );
+
+    // Para Flutter web: abrir el pdf en otra pestaña
+    final bytes = await pdf.save();
+    final blob = html.Blob([bytes], 'application/pdf');
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    html.window.open(url, '_blank');
+    html.Url.revokeObjectUrl(url);
   }
 
   void _mostrarOpcionesReserva(
@@ -416,6 +514,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                       .delete();
                   if (!mounted) return;
                   // Usa contextPadre para el SnackBar, no el contextModal
+                  // ignore: use_build_context_synchronously
                   ScaffoldMessenger.of(contextPadre).showSnackBar(
                     const SnackBar(content: Text('Reserva eliminada')),
                   );
@@ -471,7 +570,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
 
                 final item = data;
                 return Card(
-                  color: Colors.amber[50],
+                  color: const Color.fromARGB(255, 255, 172, 183),
                   elevation: 4,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
