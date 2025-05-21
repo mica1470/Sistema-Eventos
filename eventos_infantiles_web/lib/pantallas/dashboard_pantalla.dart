@@ -71,7 +71,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                   IconButton(
                     icon: const Icon(Icons.notifications),
                     onPressed: () {
-                      // Navegar a la pantalla de recordatorios o mostrar diálogo
+                      if (!mounted) return;
                       Navigator.pushNamed(context, '/recordatorios');
                     },
                   ),
@@ -241,7 +241,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
 
                 return GestureDetector(
                   onTap: () {
-                    _mostrarOpcionesReserva(id, reserva);
+                    _mostrarOpcionesReserva(context, id, reserva);
                   },
                   child: Card(
                     color: Colors.blue[50],
@@ -277,10 +277,11 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
     );
   }
 
-  void _mostrarOpcionesReserva(String id, Map<String, dynamic> reserva) {
+  void _mostrarOpcionesReserva(
+      BuildContext contextPadre, String id, Map<String, dynamic> reserva) {
     showModalBottomSheet(
-      context: context,
-      builder: (context) {
+      context: contextPadre,
+      builder: (contextModal) {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -288,9 +289,9 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               leading: const Icon(Icons.edit),
               title: const Text('Editar reserva'),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pop(contextModal);
                 Navigator.pushNamed(
-                  context,
+                  contextPadre,
                   '/editar-reserva',
                   arguments: {
                     'reservaId': id,
@@ -303,31 +304,35 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               leading: const Icon(Icons.delete),
               title: const Text('Eliminar reserva'),
               onTap: () async {
-                Navigator.pop(context);
+                Navigator.pop(contextModal);
                 final confirmar = await showDialog<bool>(
-                  context: context,
-                  builder: (context) => AlertDialog(
+                  context: contextPadre,
+                  builder: (contextDialog) => AlertDialog(
                     title: const Text('Confirmar eliminación'),
                     content:
                         const Text('¿Seguro que querés eliminar esta reserva?'),
                     actions: [
                       TextButton(
-                        onPressed: () => Navigator.pop(context, false),
+                        onPressed: () => Navigator.pop(contextDialog, false),
                         child: const Text('Cancelar'),
                       ),
                       TextButton(
-                        onPressed: () => Navigator.pop(context, true),
+                        onPressed: () => Navigator.pop(contextDialog, true),
                         child: const Text('Eliminar'),
                       ),
                     ],
                   ),
                 );
+                if (!mounted) return;
+
                 if (confirmar == true) {
                   await FirebaseFirestore.instance
                       .collection('reservas')
                       .doc(id)
                       .delete();
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  if (!mounted) return;
+                  // Usa contextPadre para el SnackBar, no el contextModal
+                  ScaffoldMessenger.of(contextPadre).showSnackBar(
                     const SnackBar(content: Text('Reserva eliminada')),
                   );
                 }

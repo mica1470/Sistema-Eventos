@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NuevaReservaPantalla extends StatefulWidget {
   final Map<String, dynamic>? reservaExistente;
@@ -23,13 +24,17 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
   final TextEditingController clienteController = TextEditingController();
   final TextEditingController telefonoController = TextEditingController();
   final TextEditingController observacionesController = TextEditingController();
+  final TextEditingController nuevoComboController = TextEditingController();
   Map<DateTime, bool> diasDisponibles = {};
   DateTime? fecha;
   TimeOfDay? horaInicio;
   TimeOfDay? horaFin;
   String combo = 'SIMPLE';
   String estadoPago = 'Pendiente';
+  List<String> horariosOcupados = [];
+  List<String> combos = []; // Importante que esté vacío al inicio
   bool cargando = false;
+
   final List<Map<String, TimeOfDay>> horariosDisponibles = [
     {
       'inicio': const TimeOfDay(hour: 14, minute: 0),
@@ -43,6 +48,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
   @override
   void initState() {
     super.initState();
+    cargarCombos();
     cargarDiasDisponibles();
     if (widget.reservaExistente != null) {
       final r = widget.reservaExistente!;
@@ -67,25 +73,76 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
     }
   }
 
+  Future<void> cargarCombos() async {
+    final prefs = await SharedPreferences.getInstance();
+    final listaGuardada = prefs.getStringList('combos');
+    setState(() {
+      combos = listaGuardada ?? ['COMBINADO', 'SIMPLE', 'COMPLETO'];
+      if (!combos.contains(combo)) {
+        combo = combos.first;
+      }
+    });
+  }
+
+  void agregarNuevoCombo() async {
+    final nuevo = nuevoComboController.text.trim().toUpperCase();
+    if (nuevo.isNotEmpty && !combos.contains(nuevo)) {
+      setState(() {
+        combos.add(nuevo);
+        combo = nuevo;
+        nuevoComboController.clear();
+      });
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('combos', combos);
+    }
+  }
+
+  DateTime normalizarFecha(DateTime fecha) {
+    return DateTime(fecha.year, fecha.month, fecha.day);
+  }
+
+  DateTime? obtenerPrimeraFechaDisponible(Map<DateTime, bool> diasDisponibles) {
+    final ahora = normalizarFecha(DateTime.now());
+    for (int i = 0; i <= 365; i++) {
+      final dia = ahora.add(Duration(days: i));
+      final diaNormalizado = normalizarFecha(dia);
+      if (diasDisponibles[diaNormalizado] == true) {
+        return diaNormalizado;
+      }
+    }
+    return null;
+  }
+
   Future<void> cargarDiasDisponibles() async {
     final ahora = DateTime.now();
     final snapshot = await FirebaseFirestore.instance
         .collection('reservas')
         .where('fecha', isGreaterThanOrEqualTo: ahora.toIso8601String())
         .get();
-    final conteoPorDia = <DateTime, int>{};
+    final conteoPorDia = <DateTime, Set<String>>{};
+
     for (var doc in snapshot.docs) {
       final fechaReserva = DateTime.tryParse(doc['fecha']);
       if (fechaReserva == null) continue;
+      final horaInicio =
+          TimeOfDay(hour: fechaReserva.hour, minute: fechaReserva.minute);
+
       final dia =
           DateTime(fechaReserva.year, fechaReserva.month, fechaReserva.day);
-      conteoPorDia[dia] = (conteoPorDia[dia] ?? 0) + 1;
+
+      // Representar el horario como string para compararlo fácilmente
+      final horarioStr = '${horaInicio.hour}:${horaInicio.minute}';
+
+      conteoPorDia[dia] = conteoPorDia[dia] ?? <String>{};
+      conteoPorDia[dia]!.add(horarioStr);
     }
+
     final nuevosDias = <DateTime, bool>{};
     for (int i = 0; i <= 365; i++) {
-      final dia = DateTime(ahora.year, ahora.month, ahora.day + i);
-      final cantidad = conteoPorDia[dia] ?? 0;
-      nuevosDias[dia] = cantidad < 2;
+      final dia = normalizarFecha(ahora.add(Duration(days: i)));
+      final ocupados = conteoPorDia[dia] ?? <String>{};
+      nuevosDias[dia] = ocupados.length < horariosDisponibles.length;
     }
     if (!mounted) return;
     setState(() {
@@ -94,60 +151,71 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
   }
 
   Future<void> guardarReserva() async {
-    if (!formKey.currentState!.validate() ||
-        fecha == null ||
-        horaInicio == null ||
-        horaFin == null) {
-      if (!mounted) return;
+    if (!formKey.currentState!.validate()) {
+      // Si el formulario no es válido, no hacemos nada.
+      return;
+    }
+    if (fecha == null || horaInicio == null || horaFin == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Por favor, complete todos los campos')),
+        const SnackBar(content: Text('Por favor, seleccione fecha y horario')),
       );
       return;
     }
-    final fechaInicioDT = DateTime(fecha!.year, fecha!.month, fecha!.day,
-        horaInicio!.hour, horaInicio!.minute);
-    final fechaFinDT = DateTime(
-        fecha!.year, fecha!.month, fecha!.day, horaFin!.hour, horaFin!.minute);
-    if (!fechaFinDT.isAfter(fechaInicioDT)) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content:
-                Text('La hora de fin debe ser posterior a la hora de inicio')),
-      );
-      return;
-    }
-    setState(() => cargando = true);
+
+    setState(() {
+      cargando = true;
+    });
+
     try {
-      final datosReserva = {
-        'cliente': clienteController.text.trim(),
-        'telefono': telefonoController.text.trim(),
+      final fechaHora = DateTime(
+        fecha!.year,
+        fecha!.month,
+        fecha!.day,
+        horaInicio!.hour,
+        horaInicio!.minute,
+      );
+
+      final reservaData = {
+        'cliente': clienteController.text,
+        'telefono': telefonoController.text,
+        'observaciones': observacionesController.text,
         'combo': combo,
         'estadoPago': estadoPago,
-        'fecha': fechaInicioDT.toIso8601String(),
+        'fecha': fechaHora.toIso8601String(),
         'horaFin':
             '${horaFin!.hour.toString().padLeft(2, '0')}:${horaFin!.minute.toString().padLeft(2, '0')}',
-        'observaciones': observacionesController.text.trim(),
+        'timestamp': FieldValue.serverTimestamp(),
       };
-      final reservasRef = FirebaseFirestore.instance.collection('reservas');
+
+      final reservasCollection =
+          FirebaseFirestore.instance.collection('reservas');
+
       if (widget.reservaId != null) {
-        await reservasRef.doc(widget.reservaId).update(datosReserva);
+        // Editar reserva existente
+        await reservasCollection.doc(widget.reservaId).update(reservaData);
       } else {
-        await reservasRef.add({
-          ...datosReserva,
-          'creado': FieldValue.serverTimestamp(),
-        });
+        // Crear nueva reserva
+        await reservasCollection.add(reservaData);
       }
+
       if (!mounted) return;
-      Navigator.pop(context);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Reserva guardada con éxito')),
+      );
+      Navigator.of(context).pushReplacementNamed('/dashboard');
+      print('Reserva guardada, intentando cerrar pantalla...');
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al guardar: $e')),
+        SnackBar(content: Text('Error al guardar reserva: $e')),
       );
     } finally {
-      if (!mounted) return;
-      setState(() => cargando = false);
+      if (mounted) {
+        setState(() {
+          cargando = false;
+        });
+      }
     }
   }
 
@@ -164,73 +232,86 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
 
   Future<void> seleccionarFechaYHorario() async {
     final ahora = DateTime.now();
-    final seleccionFecha = await showDatePicker(
-      context: context,
-      initialDate: fecha ?? ahora,
-      firstDate: ahora,
-      lastDate: ahora.add(const Duration(days: 365)),
-      selectableDayPredicate: (dia) {
-        return diasDisponibles[dia] ?? true;
-      },
-    );
-    if (seleccionFecha == null) return;
-    final disponible = await estaFechaDisponible(seleccionFecha);
-    if (!disponible) {
+
+    DateTime? fechaInicial = obtenerPrimeraFechaDisponible(diasDisponibles);
+
+    if (fechaInicial == null) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ese día ya está completo')),
+        const SnackBar(
+            content: Text('No hay fechas disponibles en el próximo año')),
       );
       return;
     }
+
+    final seleccionFecha = await showDatePicker(
+      context: context,
+      initialDate: fechaInicial,
+      firstDate: ahora,
+      lastDate: ahora.add(const Duration(days: 365)),
+      selectableDayPredicate: (dia) =>
+          diasDisponibles[normalizarFecha(dia)] ?? false,
+    );
+
+    if (!mounted || seleccionFecha == null) return;
+
     final fechaInicio =
         DateTime(seleccionFecha.year, seleccionFecha.month, seleccionFecha.day);
     final fechaFin = fechaInicio.add(const Duration(days: 1));
-    final reservas = await FirebaseFirestore.instance
+
+    final snapshot = await FirebaseFirestore.instance
         .collection('reservas')
         .where('fecha', isGreaterThanOrEqualTo: fechaInicio.toIso8601String())
         .where('fecha', isLessThan: fechaFin.toIso8601String())
         .get();
-    final horariosOcupados = reservas.docs
+
+    if (!mounted) return;
+
+    final horariosReservados = snapshot.docs
+        .where((doc) => widget.reservaId == null || doc.id != widget.reservaId)
         .map((doc) {
           final f = DateTime.tryParse(doc['fecha']);
           return f != null ? TimeOfDay(hour: f.hour, minute: f.minute) : null;
         })
         .whereType<TimeOfDay>()
         .toList();
-    final horariosDisponiblesFiltrados = horariosDisponibles.where((h) {
-      return !horariosOcupados.any((hora) =>
-          hora.hour == h['inicio']!.hour && hora.minute == h['inicio']!.minute);
+
+    final horariosDisponiblesFiltrados = horariosDisponibles.where((horario) {
+      return !horariosReservados.any((ocupado) =>
+          ocupado.hour == horario['inicio']!.hour &&
+          ocupado.minute == horario['inicio']!.minute);
     }).toList();
+
     if (horariosDisponiblesFiltrados.isEmpty) {
-      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ese día ya está completo')),
+        const SnackBar(
+            content: Text('No hay horarios disponibles para este día')),
       );
       return;
     }
-    final horarioElegido = await showDialog<Map<String, TimeOfDay>>(
+
+    final seleccionado = await showDialog<Map<String, TimeOfDay>>(
       context: context,
-      builder: (context) {
-        return SimpleDialog(
-          title: const Text('Seleccionar horario'),
-          children: horariosDisponiblesFiltrados.map((horario) {
-            final texto =
-                '${horario['inicio']!.format(context)} - ${horario['fin']!.format(context)}';
-            return SimpleDialogOption(
-              onPressed: () => Navigator.pop(context, horario),
-              child: Text(texto),
-            );
-          }).toList(),
-        );
-      },
+      builder: (context) => SimpleDialog(
+        title: const Text('Seleccionar horario'),
+        children: horariosDisponiblesFiltrados.map((horario) {
+          final label =
+              '${horario['inicio']!.format(context)} - ${horario['fin']!.format(context)}';
+          return SimpleDialogOption(
+            child: Text(label),
+            onPressed: () => Navigator.pop(context, horario),
+          );
+        }).toList(),
+      ),
     );
-    if (horarioElegido != null) {
-      setState(() {
-        fecha = seleccionFecha;
-        horaInicio = horarioElegido['inicio'];
-        horaFin = horarioElegido['fin'];
-      });
-    }
+
+    if (!mounted || seleccionado == null) return;
+
+    setState(() {
+      fecha = seleccionFecha;
+      horaInicio = seleccionado['inicio'];
+      horaFin = seleccionado['fin'];
+    });
   }
 
   @override
@@ -273,11 +354,30 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
               const SizedBox(height: 24),
               DropdownButtonFormField<String>(
                 value: combo,
-                items: ['COMBINADO', 'SIMPLE', 'COMPLETO']
+                items: combos
                     .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                     .toList(),
                 onChanged: (val) => setState(() => combo = val!),
                 decoration: const InputDecoration(labelText: 'Combo'),
+              ),
+              const SizedBox(height: 12),
+
+              // Campo para agregar nuevo combo
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: nuevoComboController,
+                      decoration: const InputDecoration(
+                        hintText: 'Agregar nuevo combo',
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: agregarNuevoCombo,
+                  ),
+                ],
               ),
               const SizedBox(height: 24),
               DropdownButtonFormField<String>(
@@ -315,5 +415,14 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    clienteController.dispose();
+    telefonoController.dispose();
+    observacionesController.dispose();
+    nuevoComboController.dispose();
+    super.dispose();
   }
 }
