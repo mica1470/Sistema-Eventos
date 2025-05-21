@@ -126,6 +126,14 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.list_alt),
+              title: const Text('Reservas'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/reservas');
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.inventory),
               title: const Text('Stock'),
               onTap: () {

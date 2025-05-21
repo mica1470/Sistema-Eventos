@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'pantallas/login_pantalla.dart';
 import 'pantallas/dashboard_pantalla.dart'; // nuevo import
-import 'firebase_options.dart';
+import 'pantallas/reservaspantalla.dart'; // nuevo import
 import 'pantallas/nueva_reserva_pantalla.dart'; // nuevo import
 import 'pantallas/stock_pantalla.dart';
 import 'pantallas/recordatorios_pantalla.dart';
@@ -51,6 +52,7 @@ class EventosInfantilesApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginPantalla(),
         '/dashboard': (context) => const DashboardPantalla(),
+        '/reservas': (context) => const ReservasPantalla(),
         '/nueva-reserva': (context) => const NuevaReservaPantalla(),
         '/editar-reserva': (context) {
           final settings = ModalRoute.of(context)!.settings;
