@@ -31,10 +31,10 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
     );
     final cardTituloStyle = TextStyle(
       fontWeight: FontWeight.bold,
-      fontSize: esEscritorio ? 20 : 16,
+      fontSize: esEscritorio ? 19 : 16,
     );
     final cardTextoStyle = TextStyle(
-      fontSize: esEscritorio ? 18 : 14,
+      fontSize: esEscritorio ? 17 : 14,
     );
 
     return Scaffold(
@@ -251,8 +251,6 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
   Widget _buildReservasGrid(TextStyle tituloStyle, TextStyle textoStyle) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        int crossAxisCount = constraints.maxWidth < 600 ? 1 : 2;
-
         DateTime soloFecha(DateTime fecha) {
           return DateTime(fecha.year, fecha.month, fecha.day);
         }
@@ -310,11 +308,12 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: reservasFiltradas.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: crossAxisCount,
-                childAspectRatio: 2.5,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 500, // El ancho máximo de cada tarjeta
+                mainAxisSpacing: 14,
+                crossAxisSpacing: 14,
+                childAspectRatio:
+                    1.6, // Puedes ajustar este valor a 1.6 o 2 según lo que necesites
               ),
               itemBuilder: (context, index) {
                 final data = reservasFiltradas[index].data();
@@ -358,6 +357,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Cliente: ${reserva['cliente'] ?? ''}',
@@ -369,9 +369,14 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                           Text('Horario: $horario', style: textoStyle),
                           Text('Combo: ${reserva['combo'] ?? ''}',
                               style: textoStyle),
-                          Text(
+                          Flexible(
+                            child: Text(
                               'Observaciones: ${reserva['observaciones'] ?? 'Ninguna'}',
-                              style: textoStyle),
+                              style: textoStyle,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                           Text('Estado de pago: ${reserva['estadoPago'] ?? ''}',
                               style: textoStyle),
                         ],
@@ -393,7 +398,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
     final titulo = pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold);
     final subtitulo =
         pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold);
-    final normal = pw.TextStyle(fontSize: 14);
+    final normal = const pw.TextStyle(fontSize: 14);
 
     pdf.addPage(
       pw.MultiPage(
