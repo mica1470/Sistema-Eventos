@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 
 class DashboardPantalla extends StatefulWidget {
   const DashboardPantalla({super.key});
@@ -142,6 +144,14 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.inventory),
+              title: const Text('Calendario'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/calendario');
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.notifications),
               title: const Text('Recordatorios'),
               onTap: () {
@@ -162,7 +172,32 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
       body: ListView(
         padding: const EdgeInsets.all(12),
         children: [
-          Text('📅 Reservas recientes', style: tituloStyle),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('📅 Reservas', style: tituloStyle),
+              DropdownButton<String>(
+                value: filtroReservas,
+                items: const [
+                  DropdownMenuItem(
+                    value: 'Recientes',
+                    child: Text('Recientes'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'Próximas a vencer',
+                    child: Text('Próximas a vencer'),
+                  ),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      filtroReservas = value;
+                    });
+                  }
+                },
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
           _buildReservasGrid(cardTituloStyle, cardTextoStyle),
           TextButton(
@@ -206,6 +241,10 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
       builder: (context, constraints) {
         int crossAxisCount = constraints.maxWidth < 600 ? 1 : 2;
 
+        DateTime soloFecha(DateTime fecha) {
+          return DateTime(fecha.year, fecha.month, fecha.day);
+        }
+
         return StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('reservas')
@@ -218,7 +257,33 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               return const Text('No hay reservas registradas');
             }
 
-            final reservas = snapshot.data!.docs;
+            final hoy = soloFecha(DateTime.now());
+            final fechaLimite = hoy.add(const Duration(days: 3));
+            final reservasSinFiltrar = snapshot.data!.docs;
+
+            final reservas = reservasSinFiltrar.where((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              final dynamic fechaRaw = data['fecha'];
+              DateTime? fecha;
+
+              if (fechaRaw is Timestamp) {
+                fecha = fechaRaw.toDate();
+              } else if (fechaRaw is String) {
+                fecha = DateTime.tryParse(fechaRaw);
+              }
+
+              if (fecha == null) return false;
+
+              if (filtroReservas == 'Próximas a vencer') {
+                final fechaSoloDia = soloFecha(fecha);
+                return fechaSoloDia
+                        .isAfter(hoy.subtract(const Duration(days: 1))) &&
+                    fechaSoloDia
+                        .isBefore(fechaLimite.add(const Duration(days: 1)));
+              }
+
+              return true;
+            }).toList();
 
             return GridView.builder(
               shrinkWrap: true,
@@ -244,8 +309,16 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                 final reserva = data;
                 final id = reservas[index].id;
 
-                final fechaStr = reserva['fecha'] ?? '';
-                DateTime fecha = DateTime.tryParse(fechaStr) ?? DateTime.now();
+                final dynamic fechaRaw = reserva['fecha'];
+                DateTime fecha;
+
+                if (fechaRaw is Timestamp) {
+                  fecha = fechaRaw.toDate();
+                } else if (fechaRaw is String) {
+                  fecha = DateTime.tryParse(fechaRaw) ?? DateTime.now();
+                } else {
+                  fecha = DateTime.now();
+                }
 
                 return GestureDetector(
                   onTap: () {
@@ -269,6 +342,9 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                               'Fecha: ${fecha.day}/${fecha.month}/${fecha.year}',
                               style: textoStyle),
                           Text('Combo: ${reserva['combo'] ?? ''}',
+                              style: textoStyle),
+                          Text(
+                              'Observaciones: ${reserva['observaciones'] ?? 'Ninguna'}',
                               style: textoStyle),
                           Text('Estado de pago: ${reserva['estadoPago'] ?? ''}',
                               style: textoStyle),
