@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:intl/intl.dart';
 import 'pantallas/login_pantalla.dart';
 import 'pantallas/dashboard_pantalla.dart'; // nuevo import
 import 'pantallas/reservaspantalla.dart'; // nuevo import
@@ -27,7 +26,7 @@ class EventosInfantilesApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Eventos Infantiles',
+      title: 'Futuros Heroes',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple),
         useMaterial3: true,

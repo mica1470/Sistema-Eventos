@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "eventos-infantiles"
-  }
+    "default": "futuros-heroes",
+    "futuros-heroes": "futuros-heroes"
+  },
+  "targets": {},
+  "etags": {}
 }

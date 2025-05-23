@@ -41,12 +41,13 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyALGl3r0CWqXWjsXBPpNU--6GOYsFLxYVk',
-    appId: '1:649989230963:web:d1b9c2640b04437208b506',
-    messagingSenderId: '649989230963',
-    projectId: 'eventos-infantiles',
-    authDomain: 'eventos-infantiles.firebaseapp.com',
-    storageBucket: 'eventos-infantiles.firebasestorage.app',
+    apiKey: 'AIzaSyB-KIrw0A2sday9wgIUtbJWDrFOsqei_YE',
+    appId: '1:62549888538:web:d443de2de3f7e5b2ce4ba3',
+    messagingSenderId: '62549888538',
+    projectId: 'futuros-heroes',
+    authDomain: 'futuros-heroes.firebaseapp.com',
+    storageBucket: 'futuros-heroes.firebasestorage.app',
+    measurementId: 'G-GL8W5HNR6P',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -83,4 +84,5 @@ class DefaultFirebaseOptions {
     authDomain: 'eventos-infantiles.firebaseapp.com',
     storageBucket: 'eventos-infantiles.firebasestorage.app',
   );
+
 }
