@@ -10,47 +10,83 @@ class RecordatoriosPantalla extends StatefulWidget {
 }
 
 class _RecordatoriosPantallaState extends State<RecordatoriosPantalla> {
-  final Set<String> ocultos = {}; // IDs de reservas ocultas
+  Map<String, Map<String, dynamic>> borradosRecientemente = {};
 
-  @override
-  Widget build(BuildContext context) {
+  void restaurarRecordatorio(String id, Map<String, dynamic> data) async {
+    await FirebaseFirestore.instance
+        .collection('recordatorios')
+        .doc(id)
+        .set(data);
+    setState(() {
+      borradosRecientemente.remove(id);
+    });
+  }
+
+  Future<void> recalcularRecordatorios() async {
     final hoy = DateTime.now();
     final enTresDias = hoy.add(const Duration(days: 3));
 
+    final snapshot = await FirebaseFirestore.instance
+        .collection('reservas')
+        .orderBy('fecha')
+        .get();
+
+    for (var doc in snapshot.docs) {
+      final data = doc.data();
+      final fecha = DateTime.tryParse(data['fecha'] ?? '');
+      if (fecha == null) continue;
+
+      if (fecha.isAfter(hoy.subtract(const Duration(seconds: 1))) &&
+          fecha.isBefore(enTresDias.add(const Duration(seconds: 1)))) {
+        await FirebaseFirestore.instance
+            .collection('recordatorios')
+            .doc(doc.id)
+            .set(data);
+      }
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Recordatorios actualizados')),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Recordatorios')),
+      appBar: AppBar(
+        title: const Text('Recordatorios'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Restaurar recordatorios',
+            onPressed: recalcularRecordatorios,
+          ),
+        ],
+      ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
-            .collection('reservas')
-            .orderBy('fecha') // debe estar en formato ISO
+            .collection('recordatorios')
+            .orderBy('fecha')
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final reservasFiltradas = snapshot.data!.docs.where((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            final fechaStr = data['fecha'] ?? '';
-            final fecha = DateTime.tryParse(fechaStr);
-            if (fecha == null || ocultos.contains(doc.id)) return false;
+          final docs = snapshot.data!.docs;
 
-            return (fecha.isAtSameMomentAs(hoy) || fecha.isAfter(hoy)) &&
-                (fecha.isBefore(enTresDias) ||
-                    fecha.isAtSameMomentAs(enTresDias));
-          }).toList();
-
-          if (reservasFiltradas.isEmpty) {
-            return const Center(
-                child: Text('No hay reservas próximas a vencer'));
+          if (docs.isEmpty) {
+            return const Center(child: Text('No hay recordatorios pendientes'));
           }
 
           return ListView.builder(
-            itemCount: reservasFiltradas.length,
+            itemCount: docs.length,
             itemBuilder: (context, index) {
-              final doc = reservasFiltradas[index];
+              final doc = docs[index];
               final data = doc.data() as Map<String, dynamic>;
-              final fecha = DateTime.tryParse(data['fecha']) ?? DateTime.now();
+              final fecha =
+                  DateTime.tryParse(data['fecha'] ?? '') ?? DateTime.now();
+              final cliente = data['cliente'] ?? 'Cliente desconocido';
               final combo = data['combo'] ?? 'Sin combo';
               final estado = data['estadoPago'] ?? 'Sin estado';
 
@@ -59,18 +95,51 @@ class _RecordatoriosPantallaState extends State<RecordatoriosPantalla> {
                 color: Colors.orange[100],
                 child: ListTile(
                   leading: const Icon(Icons.warning, color: Colors.deepOrange),
-                  title: Text(
-                      'Reserva para ${data['cliente'] ?? 'Cliente desconocido'}'),
+                  title: Text('Reserva para $cliente'),
                   subtitle: Text(
                     'Fecha: ${DateFormat('dd/MM/yyyy – kk:mm').format(fecha)}\nEstado de pago: $estado\nCombo: $combo',
                   ),
                   trailing: IconButton(
-                    icon: const Icon(Icons.close, color: Colors.red),
-                    tooltip: 'Ocultar este recordatorio',
-                    onPressed: () {
-                      setState(() {
-                        ocultos.add(doc.id);
-                      });
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    tooltip: 'Eliminar recordatorio',
+                    onPressed: () async {
+                      final confirmacion = await showDialog<bool>(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: const Text('¿Eliminar recordatorio?'),
+                          content: const Text('Esto lo borrará temporalmente.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancelar'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Eliminar'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirmacion == true) {
+                        borradosRecientemente[doc.id] = data;
+                        await FirebaseFirestore.instance
+                            .collection('recordatorios')
+                            .doc(doc.id)
+                            .delete();
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: const Text('Recordatorio eliminado'),
+                            action: SnackBarAction(
+                              label: 'Restaurar',
+                              onPressed: () {
+                                restaurarRecordatorio(doc.id, data);
+                              },
+                            ),
+                          ),
+                        );
+                      }
                     },
                   ),
                 ),
