@@ -143,7 +143,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                 children: [
                   const CircleAvatar(
                     radius: 28,
-                    backgroundImage: AssetImage('../assets/imagen.jpg'),
+                    backgroundImage: AssetImage('assets/imagen.jpg'),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -280,7 +280,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
         onPressed: () => Navigator.pushNamed(context, '/nueva-reserva'),
         icon: const Icon(Icons.add),
         label: const Text('Nueva Reserva'),
-        backgroundColor: const Color(0xFFA0D8EF),
+        backgroundColor: const Color(0xFFFDE047),
         foregroundColor: const Color.fromARGB(255, 0, 0, 0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'registro_pantalla.dart';
 
 class LoginPantalla extends StatefulWidget {
   const LoginPantalla({super.key});
@@ -38,6 +37,35 @@ class _LoginPantallaState extends State<LoginPantalla> {
     } on FirebaseAuthException catch (e) {
       setState(() {
         errorMensaje = e.message;
+      });
+    } finally {
+      setState(() {
+        cargando = false;
+      });
+    }
+  }
+
+  Future<void> _iniciarSesionConGoogle() async {
+    setState(() {
+      cargando = true;
+      errorMensaje = null;
+    });
+
+    try {
+      GoogleAuthProvider googleProvider = GoogleAuthProvider();
+
+      // Flutter web: usa signInWithPopup para evitar problemas con redirecciones
+      await FirebaseAuth.instance.signInWithPopup(googleProvider);
+
+      if (!mounted) return;
+      Navigator.of(context).pushReplacementNamed('/dashboard');
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        errorMensaje = e.message;
+      });
+    } catch (e) {
+      setState(() {
+        errorMensaje = 'Error inesperado: $e';
       });
     } finally {
       setState(() {
@@ -115,31 +143,45 @@ class _LoginPantallaState extends State<LoginPantalla> {
                   if (cargando)
                     const CircularProgressIndicator()
                   else
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            const Color(0xFFFDE047), // 🍓 Rosa coral
-                        foregroundColor: const Color.fromARGB(153, 66, 66, 66),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 32, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                    Column(
+                      children: [
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                const Color(0xFFFDE047), // 🍭 Amarillo suave
+                            foregroundColor:
+                                const Color.fromARGB(153, 66, 66, 66),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 32, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          onPressed: _iniciarSesion,
+                          child: const Text(
+                            "Iniciar sesión",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ),
-                      ),
-                      onPressed: _iniciarSesion,
-                      child: const Text(
-                        "Iniciar sesión",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                        const SizedBox(height: 16),
+                        OutlinedButton.icon(
+                          label: const Text('Iniciar sesión con Google'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.black87,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          onPressed: _iniciarSesionConGoogle,
+                        ),
+                      ],
                     ),
                   const SizedBox(height: 16),
                   TextButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const RegistroPantalla()),
-                      );
+                      Navigator.pushNamed(context, '/registro');
                     },
                     child: Stack(
                       children: [
@@ -151,8 +193,7 @@ class _LoginPantallaState extends State<LoginPantalla> {
                             foreground: Paint()
                               ..style = PaintingStyle.stroke
                               ..strokeWidth = 1
-                              ..color = const Color.fromARGB(
-                                  118, 66, 66, 66), // borde gris oscuro
+                              ..color = const Color.fromARGB(118, 66, 66, 66),
                           ),
                         ),
                         const Text(
