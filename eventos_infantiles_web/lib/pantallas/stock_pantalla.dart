@@ -9,7 +9,19 @@ class StockPantalla extends StatelessWidget {
     final stockCollection = FirebaseFirestore.instance.collection('stock');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Stock')),
+      backgroundColor: const Color(0xFFF3F4F6), // Gris claro
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        title: const Text(
+          'Stock',
+          style: TextStyle(
+            color: Color(0xFFFF6B81), // Amarillo suave
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Colors.black),
+        elevation: 1,
+      ),
       body: StreamBuilder<QuerySnapshot>(
         stream: stockCollection
             .orderBy('ultimaModificacion', descending: true)
@@ -28,7 +40,12 @@ class StockPantalla extends StatelessWidget {
               final data = doc.data() as Map<String, dynamic>;
 
               return Card(
+                color: Colors.white,
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: ListTile(
                   title: Text(data['nombre'] ?? ''),
                   subtitle: Text(
@@ -53,6 +70,8 @@ class StockPantalla extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFFFF6B81), // Rosa coral
+        foregroundColor: Colors.white,
         onPressed: () {
           showDialog(
             context: context,
@@ -123,7 +142,14 @@ class _StockDialogState extends State<StockDialog> {
     final stockCollection = FirebaseFirestore.instance.collection('stock');
 
     return AlertDialog(
-      title: Text(widget.doc == null ? 'Nuevo ítem' : 'Editar ítem'),
+      backgroundColor: Colors.white,
+      title: Text(
+        widget.doc == null ? 'Nuevo ítem' : 'Editar ítem',
+        style: const TextStyle(
+          color: Color(0xFFA0D8EF), // Amarillo suave
+          fontWeight: FontWeight.bold,
+        ),
+      ),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -191,10 +217,17 @@ class _StockDialogState extends State<StockDialog> {
       ),
       actions: [
         TextButton(
+          style: TextButton.styleFrom(
+            foregroundColor: const Color(0xFFA0D8EF), // Azul pastel
+          ),
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancelar'),
         ),
         ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFFF6B81), // Rosa coral
+            foregroundColor: Colors.white,
+          ),
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
               final nombre = nombreController.text.trim();

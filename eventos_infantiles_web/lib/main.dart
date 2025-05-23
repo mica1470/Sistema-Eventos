@@ -28,7 +28,9 @@ class EventosInfantilesApp extends StatelessWidget {
     return MaterialApp(
       title: 'Futuros Heroes',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFFFDE047), // amarillo suave
+        ),
         useMaterial3: true,
         textTheme: GoogleFonts.poppinsTextTheme(),
         inputDecorationTheme: InputDecorationTheme(
@@ -41,17 +43,16 @@ class EventosInfantilesApp extends StatelessWidget {
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.purple,
-            foregroundColor: Colors.white,
+            backgroundColor: const Color(0xFFA0D8EF), // celeste claro
+            foregroundColor: Colors.black,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         ),
       ),
       debugShowCheckedModeBanner: false,
-
-      // ✅ Agregá estas líneas:
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -61,7 +62,6 @@ class EventosInfantilesApp extends StatelessWidget {
         Locale('es', 'ES'),
       ],
       locale: const Locale('es', 'ES'),
-
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPantalla(),

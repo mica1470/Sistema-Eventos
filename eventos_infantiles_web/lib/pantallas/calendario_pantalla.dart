@@ -1,4 +1,5 @@
-import 'dart:html' as html; // Importar para descarga en web
+// ignore_for_file: library_private_types_in_public_api, avoid_web_libraries_in_flutter, unnecessary_to_list_in_spreads
+import 'dart:html' as html;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -90,7 +91,7 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
     final anioActual = _diaEnfocado.year;
     final fontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');
     final ttf = pw.Font.ttf(fontData.buffer.asByteData());
-    // Filtrar eventos del mes actual
+
     final eventosMes = _eventos.entries.where((entry) {
       final fecha = entry.key;
       return fecha.month == mesActual && fecha.year == anioActual;
@@ -110,11 +111,12 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
         pageFormat: PdfPageFormat.a4,
         build: (context) => [
           pw.Header(
-              level: 0,
-              child: pw.Text(
-                'Reservas para el mes',
-                style: const pw.TextStyle(fontSize: 24),
-              )),
+            level: 0,
+            child: pw.Text(
+              'Reservas para el mes',
+              style: const pw.TextStyle(fontSize: 24),
+            ),
+          ),
           ...eventosMes.map((entry) {
             final fecha = entry.key;
             final reservas = entry.value;
@@ -135,8 +137,9 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
                     final horario = DateFormat.Hm().format(fechaReserva);
 
                     return pw.Bullet(
-                        text:
-                            '${reserva['cliente'] ?? 'Sin nombre'} - $horario\nCombo: ${reserva['combo'] ?? '-'}\nEstado de pago: ${reserva['estado_pago'] ?? '-'}');
+                      text:
+                          '${reserva['cliente'] ?? 'Sin nombre'} - $horario\nCombo: ${reserva['combo'] ?? '-'}\nEstado de pago: ${reserva['estado_pago'] ?? '-'}',
+                    );
                   }).toList(),
                 ),
                 pw.SizedBox(height: 15),
@@ -149,7 +152,6 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
 
     final bytes = await pdf.save();
 
-    // Descargar PDF en Flutter Web
     final blob = html.Blob([bytes], 'application/pdf');
     final url = html.Url.createObjectUrlFromBlob(blob);
     final anchor = html.document.createElement('a') as html.AnchorElement
@@ -167,8 +169,11 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF3F4F6), // Fondo gris claro
       appBar: AppBar(
         title: const Text('Calendario de Reservas'),
+        backgroundColor: const Color(0xFFFDE047), // Amarillo suave
+        foregroundColor: Colors.black87,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
@@ -181,6 +186,7 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
             icon: const Icon(Icons.picture_as_pdf),
             tooltip: 'Exportar PDF',
             onPressed: _generarPdf,
+            color: const Color(0xFFFF6B81), // Rosa coral para icono PDF
           ),
         ],
       ),
@@ -212,51 +218,73 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
             },
             calendarStyle: const CalendarStyle(
               markerDecoration: BoxDecoration(
-                color: Colors.purple,
+                color: Color(0xFFFF6B81), // Rosa coral
+                shape: BoxShape.circle,
+              ),
+              todayDecoration: BoxDecoration(
+                color: Color(0xFFA0D8EF), // Amarillo suave para hoy
+                shape: BoxShape.circle,
+              ),
+              selectedDecoration: BoxDecoration(
+                color: Color.fromARGB(
+                    255, 228, 95, 115), // Rosa coral oscuro para selección
                 shape: BoxShape.circle,
               ),
             ),
+            headerStyle: HeaderStyle(
+              titleTextStyle: const TextStyle(
+                color: Color(0xFFFF6B81), // Amarillo suave encabezados
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+              formatButtonVisible: true,
+              formatButtonShowsNext: false,
+              formatButtonDecoration: BoxDecoration(
+                color: const Color(0xFFFF6B81), // Rosa coral
+                borderRadius: BorderRadius.circular(8),
+              ),
+              formatButtonTextStyle: const TextStyle(color: Colors.white),
+              leftChevronIcon:
+                  const Icon(Icons.chevron_left, color: Color(0xFFFF6B81)),
+              rightChevronIcon:
+                  const Icon(Icons.chevron_right, color: Color(0xFFFF6B81)),
+            ),
           ),
-          const Divider(),
+          const SizedBox(height: 12),
           Expanded(
             child: _reservasDelDia.isEmpty
-                ? const Center(child: Text("No hay reservas este día"))
+                ? const Center(child: Text('No hay reservas para este día'))
                 : ListView.builder(
                     itemCount: _reservasDelDia.length,
                     itemBuilder: (context, index) {
                       final reserva = _reservasDelDia[index];
-
-                      final fechaReserva = reserva['fecha'] is Timestamp
+                      final fecha = reserva['fecha'] is Timestamp
                           ? (reserva['fecha'] as Timestamp).toDate()
                           : DateTime.tryParse(reserva['fecha']) ??
                               DateTime.now();
 
-                      final horario = DateFormat.Hm().format(fechaReserva);
-
                       return Card(
                         margin: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
+                            vertical: 6, horizontal: 16),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        color: Colors.white,
                         child: ListTile(
-                          leading:
-                              const Icon(Icons.event, color: Colors.purple),
                           title: Text(
-                              '${reserva['cliente'] ?? 'Sin nombre'} - $horario'),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Combo: ${reserva['combo'] ?? '-'}'),
-                              Text(
-                                  'Estado de pago: ${_formatearEstadoPago(reserva['estadoPago'])}'),
-                              Text(
-                                  'Observaciones: ${reserva['observaciones'] ?? 'Ninguna'}'),
-                            ],
-                          ),
+                              reserva['cliente'] ?? 'Cliente sin nombre',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFFFF6B81))),
+                          subtitle: Text(
+                              'Hora: ${DateFormat.Hm().format(fecha)}\nCombo: ${reserva['combo'] ?? '-'}\nEstado: ${_formatearEstadoPago(reserva['estado_pago'])}'),
                           isThreeLine: true,
+                          trailing: const Icon(Icons.event_note,
+                              color: Color(0xFFA0D8EF)),
                         ),
                       );
                     },
                   ),
-          )
+          ),
         ],
       ),
     );

@@ -33,10 +33,7 @@ class _LoginPantallaState extends State<LoginPantalla> {
         password: password,
       );
 
-      // Navegar al Dashboard
-      if (!mounted) {
-        return; // para evitar errores si el widget ya no está en pantalla
-      }
+      if (!mounted) return;
       Navigator.of(context).pushReplacementNamed('/dashboard');
     } on FirebaseAuthException catch (e) {
       setState(() {
@@ -52,14 +49,14 @@ class _LoginPantallaState extends State<LoginPantalla> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.purple.shade50,
+      backgroundColor: const Color(0xFFF3F4F6), // 🪄 Gris claro
       body: Center(
         child: SingleChildScrollView(
           child: Container(
             constraints: const BoxConstraints(maxWidth: 400),
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.white, // 🎨 Blanco
               borderRadius: BorderRadius.circular(24),
               boxShadow: const [
                 BoxShadow(blurRadius: 12, color: Colors.black12)
@@ -69,15 +66,35 @@ class _LoginPantallaState extends State<LoginPantalla> {
               key: formKey,
               child: Column(
                 children: [
-                  const Text(
-                    "Acceso al sistema",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  Stack(
+                    children: [
+                      Text(
+                        "Acceso al sistema",
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          foreground: Paint()
+                            ..style = PaintingStyle.stroke
+                            ..strokeWidth = 1
+                            ..color = const Color.fromARGB(118, 66, 66, 66),
+                        ),
+                      ),
+                      const Text(
+                        "Acceso al sistema",
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFFF6B81),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 24),
                   TextFormField(
                     controller: emailController,
-                    decoration:
-                        const InputDecoration(labelText: "Correo electrónico"),
+                    decoration: const InputDecoration(
+                      labelText: "Correo electrónico",
+                    ),
                     validator: (valor) => valor != null && valor.contains('@')
                         ? null
                         : 'Ingrese un correo válido',
@@ -99,8 +116,21 @@ class _LoginPantallaState extends State<LoginPantalla> {
                     const CircularProgressIndicator()
                   else
                     ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            const Color(0xFFFDE047), // 🍓 Rosa coral
+                        foregroundColor: const Color.fromARGB(153, 66, 66, 66),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
                       onPressed: _iniciarSesion,
-                      child: const Text("Iniciar sesión"),
+                      child: const Text(
+                        "Iniciar sesión",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
                   const SizedBox(height: 16),
                   TextButton(
@@ -111,7 +141,30 @@ class _LoginPantallaState extends State<LoginPantalla> {
                             builder: (_) => const RegistroPantalla()),
                       );
                     },
-                    child: const Text('¿No tienes cuenta? Regístrate'),
+                    child: Stack(
+                      children: [
+                        Text(
+                          '¿No tienes cuenta? Regístrate',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            foreground: Paint()
+                              ..style = PaintingStyle.stroke
+                              ..strokeWidth = 1
+                              ..color = const Color.fromARGB(
+                                  118, 66, 66, 66), // borde gris oscuro
+                          ),
+                        ),
+                        const Text(
+                          '¿No tienes cuenta? Regístrate',
+                          style: TextStyle(
+                            fontSize: 17,
+                            color: Color(0xFFA0D8EF), // azul pastel
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

@@ -32,11 +32,10 @@ class _RegistroPantallaState extends State<RegistroPantalla> {
         password: password,
       );
 
-      // Registro exitoso: mostrar mensaje y volver al login
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Usuario registrado correctamente')),
       );
-      Navigator.pop(context); // vuelve a la pantalla anterior (login)
+      Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       setState(() {
         errorMensaje = e.message;
@@ -51,18 +50,22 @@ class _RegistroPantallaState extends State<RegistroPantalla> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.purple.shade50,
-      appBar: AppBar(title: const Text('Registro de usuario')),
+      backgroundColor: const Color(0xFFF3F4F6), // 🪄 Gris claro
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFFDE047), // 🍭 Amarillo suave
+        foregroundColor: Colors.black,
+        title: const Text('Registro de usuario'),
+      ),
       body: Center(
         child: SingleChildScrollView(
           child: Container(
             constraints: const BoxConstraints(maxWidth: 400),
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.white, // 🎨 Blanco
               borderRadius: BorderRadius.circular(24),
               boxShadow: const [
-                BoxShadow(blurRadius: 12, color: Colors.black12)
+                BoxShadow(blurRadius: 12, color: Colors.black12),
               ],
             ),
             child: Form(
@@ -71,8 +74,9 @@ class _RegistroPantallaState extends State<RegistroPantalla> {
                 children: [
                   TextFormField(
                     controller: emailController,
-                    decoration:
-                        const InputDecoration(labelText: "Correo electrónico"),
+                    decoration: const InputDecoration(
+                      labelText: "Correo electrónico",
+                    ),
                     validator: (valor) => valor != null && valor.contains('@')
                         ? null
                         : 'Ingrese un correo válido',
@@ -94,8 +98,21 @@ class _RegistroPantallaState extends State<RegistroPantalla> {
                     const CircularProgressIndicator()
                   else
                     ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            const Color(0xFFFF6B81), // 🍓 Rosa coral
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
                       onPressed: _registrarUsuario,
-                      child: const Text("Registrar"),
+                      child: const Text(
+                        "Registrar",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
                 ],
               ),

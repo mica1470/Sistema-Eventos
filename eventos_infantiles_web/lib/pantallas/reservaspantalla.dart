@@ -7,12 +7,22 @@ class ReservasPantalla extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF3F4F6), // Fondo general
       appBar: AppBar(
-        title: const Text('Todas las Reservas'),
+        backgroundColor: Colors.white,
+        title: const Text(
+          'Todas las Reservas',
+          style: TextStyle(
+            color: Color(0xFFFDE047), // Amarillo suave
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Colors.black),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
             tooltip: 'Nueva Reserva',
+            color: Color(0xFFFF6B81), // Rosa coral
             onPressed: () {
               Navigator.pushNamed(context, '/nueva-reserva');
             },
@@ -52,32 +62,44 @@ class ReservasPantalla extends StatelessWidget {
               final fechaStr = reserva['fecha'] ?? '';
               final fecha = DateTime.tryParse(fechaStr) ?? DateTime.now();
 
-              return ListTile(
-                leading: const Icon(Icons.event),
-                title: Text(cliente),
-                subtitle: Text(
-                  'Fecha: ${fecha.day}/${fecha.month}/${fecha.year} • Combo: $combo • Pago: $estadoPago',
-                ),
-                trailing: PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'editar') {
-                      Navigator.pushNamed(
-                        context,
-                        '/editar-reserva',
-                        arguments: {
-                          'reservaId': id,
-                          'reservaDatos': reserva,
-                        },
-                      );
-                    } else if (value == 'eliminar') {
-                      _confirmarEliminacion(context, id);
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(value: 'editar', child: Text('Editar')),
-                    const PopupMenuItem(
-                        value: 'eliminar', child: Text('Eliminar')),
-                  ],
+              return Card(
+                color: Colors.white, // Contenedor blanco
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ListTile(
+                  leading: const Icon(Icons.event, color: Colors.black),
+                  title: Text(
+                    cliente,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    'Fecha: ${fecha.day}/${fecha.month}/${fecha.year} • Combo: $combo • Pago: $estadoPago',
+                  ),
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'editar') {
+                        Navigator.pushNamed(
+                          context,
+                          '/editar-reserva',
+                          arguments: {
+                            'reservaId': id,
+                            'reservaDatos': reserva,
+                          },
+                        );
+                      } else if (value == 'eliminar') {
+                        _confirmarEliminacion(context, id);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'editar',
+                        child: Text('Editar'),
+                      ),
+                      const PopupMenuItem(
+                        value: 'eliminar',
+                        child: Text('Eliminar'),
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -92,15 +114,22 @@ class ReservasPantalla extends StatelessWidget {
       context: context,
       builder: (contextDialog) => AlertDialog(
         title: const Text('Confirmar eliminación'),
-        content:
-            const Text('¿Estás seguro de que querés eliminar esta reserva?'),
+        content: const Text(
+          '¿Estás seguro de que querés eliminar esta reserva?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(contextDialog, false),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFFA0D8EF), // Azul pastel
+            ),
             child: const Text('Cancelar'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(contextDialog, true),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFFFF6B81), // Rosa coral
+            ),
             child: const Text('Eliminar'),
           ),
         ],

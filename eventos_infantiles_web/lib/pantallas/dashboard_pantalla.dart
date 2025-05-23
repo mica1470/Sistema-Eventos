@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:html' as html;
 
 class DashboardPantalla extends StatefulWidget {
@@ -25,21 +26,42 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
     final ancho = MediaQuery.of(context).size.width;
     final esEscritorio = ancho >= 800;
 
-    final tituloStyle = TextStyle(
+    final tituloStyle = GoogleFonts.poppins(
       fontSize: esEscritorio ? 28 : 20,
       fontWeight: FontWeight.bold,
+      color: Colors.black87,
     );
-    final cardTituloStyle = TextStyle(
+    final cardTituloStyle = GoogleFonts.poppins(
       fontWeight: FontWeight.bold,
-      fontSize: esEscritorio ? 19 : 16,
+      fontSize: esEscritorio ? 18 : 16,
+      color: Colors.black87,
     );
-    final cardTextoStyle = TextStyle(
-      fontSize: esEscritorio ? 17 : 14,
+    final cardTextoStyle = GoogleFonts.poppins(
+      fontSize: esEscritorio ? 16 : 14,
+      color: Colors.grey[800],
     );
-
     return Scaffold(
+      backgroundColor: const Color(0xFFF3F4F6),
       appBar: AppBar(
-        title: const Text('Futuros Heroes'),
+        backgroundColor: const Color.fromARGB(151, 253, 223, 71),
+        elevation: 2,
+        title: Row(
+          children: [
+            Image.asset(
+              '../assets/imagen.jpg',
+              height: 40,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Futuros Héroes',
+              style: GoogleFonts.poppins(
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+                fontSize: 22,
+              ),
+            ),
+          ],
+        ),
         actions: [
           // StreamBuilder para contar reservas próximas a vencer en 3 días
           StreamBuilder<QuerySnapshot>(
@@ -52,10 +74,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
 
               final hoy = DateTime.now();
               final tresDiasDespues = hoy.add(const Duration(days: 3));
-
               final reservas = snapshot.data!.docs;
-
-              // Filtrar reservas con fecha dentro de los próximos 3 días
               final proximasAVencer = reservas.where((doc) {
                 final data = doc.data() as Map<String, dynamic>;
                 final fechaStr = data['fecha'] ?? '';
@@ -70,12 +89,11 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               if (proximasAVencer == 0) return const SizedBox();
 
               return Stack(
-                alignment: Alignment.center,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.notifications),
+                    icon: const Icon(Icons.notifications_active_rounded,
+                        color: Colors.black87),
                     onPressed: () {
-                      if (!mounted) return;
                       Navigator.pushNamed(context, '/recordatorios');
                     },
                   ),
@@ -85,15 +103,12 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                     child: Container(
                       padding: const EdgeInsets.all(5),
                       decoration: BoxDecoration(
-                        color: Colors.red,
+                        color: Colors.redAccent,
                         borderRadius: BorderRadius.circular(15),
                       ),
-                      constraints: const BoxConstraints(
-                        minWidth: 20,
-                        minHeight: 20,
-                      ),
+                      constraints: const BoxConstraints(minWidth: 20),
                       child: Text(
-                        '$proximasAVencer',
+                        '${reservas.length}',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -111,61 +126,83 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
         ],
       ),
       drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
+        backgroundColor: Colors.grey[50],
+        child: Column(
           children: [
-            const DrawerHeader(
-              decoration:
-                  BoxDecoration(color: Color.fromARGB(171, 247, 234, 125)),
-              child: Text('Menú',
-                  style: TextStyle(
-                      color: Color.fromARGB(255, 51, 46, 46), fontSize: 24)),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                color: Color.fromARGB(151, 253, 223, 71), // Amarillo suave
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(24),
+                  bottomRight: Radius.circular(24),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const CircleAvatar(
+                    radius: 28,
+                    backgroundImage: AssetImage('../assets/imagen.jpg'),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      'Futuros Héroes',
+                      style: GoogleFonts.poppins(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            ListTile(
-              leading: const Icon(Icons.add_box),
-              title: const Text('Nueva Reserva'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/nueva-reserva');
-              },
+            const SizedBox(height: 16),
+            _buildMenuItem(
+              icon: Icons.add_box_rounded,
+              text: 'Nueva Reserva',
+              context: context,
+              route: '/nueva-reserva',
             ),
-            ListTile(
-              leading: const Icon(Icons.list_alt),
-              title: const Text('Reservas'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/reservas');
-              },
+            _buildMenuItem(
+              icon: Icons.list_alt_rounded,
+              text: 'Reservas',
+              context: context,
+              route: '/reservas',
             ),
-            ListTile(
-              leading: const Icon(Icons.inventory),
-              title: const Text('Stock'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/stock');
-              },
+            _buildMenuItem(
+              icon: Icons.inventory_2_rounded,
+              text: 'Stock',
+              context: context,
+              route: '/stock',
             ),
-            ListTile(
-              title: const Text('📅  Calendario'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/calendario');
-              },
+            _buildMenuItem(
+              icon: Icons.calendar_today_rounded,
+              text: 'Calendario',
+              context: context,
+              route: '/calendario',
             ),
-            ListTile(
-              leading: const Icon(Icons.notifications),
-              title: const Text('Recordatorios'),
-              onTap: () {
-                Navigator.pushNamed(context, '/recordatorios');
-              },
+            _buildMenuItem(
+              icon: Icons.notifications_active_rounded,
+              text: 'Recordatorios',
+              context: context,
+              route: '/recordatorios',
             ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Configuración'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(context, '/configuracion');
-              },
+            _buildMenuItem(
+              icon: Icons.settings_rounded,
+              text: 'Configuración',
+              context: context,
+              route: '/configuracion',
+            ),
+            const Spacer(),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 24),
+              child: Text(
+                '© 2025 Futuros Héroes',
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
+              ),
             ),
           ],
         ),
@@ -181,6 +218,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                 children: [
                   DropdownButton<String>(
                     value: filtroReservas,
+                    style: GoogleFonts.poppins(color: Colors.black87),
                     items: const [
                       DropdownMenuItem(
                         value: 'Recientes',
@@ -239,11 +277,36 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.pushNamed(context, '/nueva-reserva');
-        },
+        onPressed: () => Navigator.pushNamed(context, '/nueva-reserva'),
         icon: const Icon(Icons.add),
         label: const Text('Nueva Reserva'),
+        backgroundColor: const Color(0xFFA0D8EF),
+        foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+    );
+  }
+
+  Widget _buildMenuItem({
+    required IconData icon,
+    required String text,
+    required BuildContext context,
+    required String route,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: ListTile(
+          leading: Icon(icon, color: Colors.pinkAccent),
+          title: Text(text, style: GoogleFonts.poppins(fontSize: 16)),
+          trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.pushNamed(context, route);
+          },
+        ),
       ),
     );
   }
@@ -333,7 +396,6 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                 final fechaReserva = reserva['fecha'] is Timestamp
                     ? (reserva['fecha'] as Timestamp).toDate()
                     : DateTime.tryParse(reserva['fecha']) ?? DateTime.now();
-
                 final horario = DateFormat.Hm().format(fechaReserva);
 
                 if (fechaRaw is Timestamp) {
@@ -349,7 +411,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                     _mostrarOpcionesReserva(context, id, reserva);
                   },
                   child: Card(
-                    color: const Color.fromARGB(255, 203, 231, 252),
+                    color: const Color(0xFFA0D8EF),
                     elevation: 4,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -398,7 +460,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
     final titulo = pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold);
     final subtitulo =
         pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold);
-    final normal = const pw.TextStyle(fontSize: 14);
+    const normal = pw.TextStyle(fontSize: 14);
 
     pdf.addPage(
       pw.MultiPage(
@@ -565,7 +627,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                 final data = items[index].data();
                 if (data is! Map<String, dynamic>) {
                   return Card(
-                    color: Colors.red.shade100,
+                    color: const Color.fromARGB(167, 255, 107, 129),
                     child: Center(
                       child:
                           Text('Datos inválidos en stock', style: textoStyle),
@@ -575,7 +637,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
 
                 final item = data;
                 return Card(
-                  color: const Color.fromARGB(255, 255, 172, 183),
+                  color: const Color.fromARGB(167, 255, 107, 129),
                   elevation: 4,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
