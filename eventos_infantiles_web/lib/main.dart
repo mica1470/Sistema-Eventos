@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'pantallas/login_pantalla.dart';
+import 'pantallas/registro_pantalla.dart';
 import 'pantallas/dashboard_pantalla.dart'; // nuevo import
 import 'pantallas/reservaspantalla.dart'; // nuevo import
 import 'pantallas/nueva_reserva_pantalla.dart'; // nuevo import
@@ -65,6 +66,7 @@ class EventosInfantilesApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPantalla(),
+        '/registro': (context) => const RegistroPantalla(),
         '/dashboard': (context) => const DashboardPantalla(),
         '/reservas': (context) => const ReservasPantalla(),
         '/nueva-reserva': (context) => const NuevaReservaPantalla(),

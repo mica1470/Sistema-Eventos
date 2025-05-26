@@ -87,39 +87,51 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               }).length;
 
               if (proximasAVencer == 0) return const SizedBox();
-
-              return Stack(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.notifications_active_rounded,
-                        color: Colors.black87),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/recordatorios');
-                    },
-                  ),
-                  Positioned(
-                    right: 8,
-                    top: 8,
-                    child: Container(
-                      padding: const EdgeInsets.all(5),
-                      decoration: BoxDecoration(
-                        color: Colors.redAccent,
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      constraints: const BoxConstraints(minWidth: 20),
-                      child: Text(
-                        '${reservas.length}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+              if (proximasAVencer > 0) {
+                return Stack(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.notifications_active_rounded,
+                          color: Colors.black87),
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/recordatorios');
+                      },
+                    ),
+                    Positioned(
+                      right: 25,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          color: Colors.redAccent,
+                          borderRadius: BorderRadius.circular(15),
                         ),
-                        textAlign: TextAlign.center,
+                        constraints: const BoxConstraints(minWidth: 15),
+                        child: Text(
+                          '${reservas.length}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              );
+                  ],
+                );
+              } else {
+                return Stack(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.notifications_active_rounded,
+                          color: Colors.black87),
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/recordatorios');
+                      },
+                    ),
+                  ],
+                );
+              }
             },
           ),
           const SizedBox(width: 8),
@@ -240,9 +252,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                   IconButton(
                     icon: const Icon(Icons.download),
                     tooltip: 'Descargar reservas visibles en PDF',
-                    onPressed: reservasVisibles.isEmpty
-                        ? null
-                        : () => _generarPdf(reservasVisibles),
+                    onPressed: () => _generarPdf(reservasVisibles),
                   ),
                 ],
               ),
@@ -425,22 +435,30 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                           Text('Cliente: ${reserva['cliente'] ?? ''}',
                               style: tituloStyle),
                           const SizedBox(height: 8),
+                          Text('Telefono: ${reserva['telefono'] ?? ''}',
+                              style: textoStyle),
                           Text(
                               'Fecha: ${fecha.day}/${fecha.month}/${fecha.year}',
                               style: textoStyle),
                           Text('Horario: $horario', style: textoStyle),
-                          Text('Combo: ${reserva['combo'] ?? ''}',
+                          Text(
+                              'Combo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? ''}',
+                              style: textoStyle),
+                          Text(
+                              'Combo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? ''}',
+                              style: textoStyle),
+                          Text('Piñata: ${reserva['pinata'] ?? ''}',
+                              style: textoStyle),
+                          Text('Estado de pago: ${reserva['estadoPago'] ?? ''}',
                               style: textoStyle),
                           Flexible(
                             child: Text(
-                              'Observaciones: ${reserva['observaciones'] ?? 'Ninguna'}',
+                              'Solicitud Especial: ${reserva['solicitudEspecial'] ?? 'Ninguna'}',
                               style: textoStyle,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          Text('Estado de pago: ${reserva['estadoPago'] ?? ''}',
-                              style: textoStyle),
                         ],
                       ),
                     ),
@@ -503,9 +521,18 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                     pw.Text('Fecha: ${fecha.day}/${fecha.month}/${fecha.year}',
                         style: normal),
                     pw.Text('Horario: $horario', style: normal),
-                    pw.Text('Combo: ${reserva['combo'] ?? ''}', style: normal),
+                    pw.Text('Telefono: ${reserva['telefono'] ?? ''}',
+                        style: normal),
                     pw.Text(
-                        'Observaciones: ${reserva['observaciones'] ?? 'Ninguna'}',
+                        'Combo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? ''}',
+                        style: normal),
+                    pw.Text(
+                        'Combo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? ''}',
+                        style: normal),
+                    pw.Text('Piñata: ${reserva['pinata'] ?? ''}',
+                        style: normal),
+                    pw.Text(
+                        'Solicitud Especial: ${reserva['solicitudEspecial'] ?? 'Ninguna'}',
                         style: normal),
                     pw.Text('Estado de pago: ${reserva['estadoPago'] ?? ''}',
                         style: normal),
