@@ -59,8 +59,29 @@ class StockPantalla extends StatelessWidget {
                   },
                   trailing: IconButton(
                     icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      stockCollection.doc(doc.id).delete();
+                    onPressed: () async {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Confirmar eliminación'),
+                          content: const Text(
+                              '¿Desea eliminar este ítem del stock?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('Cancelar'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('Eliminar'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirm == true) {
+                        await stockCollection.doc(doc.id).delete();
+                      }
                     },
                   ),
                 ),

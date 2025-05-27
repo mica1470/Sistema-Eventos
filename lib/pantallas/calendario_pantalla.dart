@@ -129,7 +129,7 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
 
                     return pw.Bullet(
                       text:
-                          '${reserva['cliente'] ?? 'Sin nombre'} - $horario\nTelefono: ${reserva['telefono'] ?? ''}\nCombo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? '-'}\nCombo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? '-'}\nPiñata: ${reserva['pinata'] ?? '-'}\nEstado de pago: ${reserva['estadoPago'] ?? '-'}\nSolicitud Especial: ${reserva['solicitudEspecial'] ?? 'Ninguna'}',
+                          '${reserva['cliente'] ?? 'Sin nombre'} - $horario\nAdulto Responsable: ${reserva['adultoResponsable'] ?? 'Sin nombre'} \nTelefono: ${reserva['telefono'] ?? ''}\nCantidad de niños: ${reserva['cantidadNinos'] ?? '-'}\nCantidad de adultos: ${reserva['cantidadAdultos'] ?? '-'}\nCombo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? '-'}\nCombo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? '-'}\nPiñata: ${reserva['pinata'] ?? '-'}\nEstado de pago: ${reserva['estadoPago'] ?? '-'}\nSolicitud Especial: ${reserva['solicitudEspecial'] ?? 'Ninguna'}',
                     );
                   }).toList(),
                 ),
@@ -261,14 +261,12 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
                             borderRadius: BorderRadius.circular(12)),
                         color: Colors.white,
                         child: ListTile(
-                          title: Text(
-                              'Cumpleañero: ${reserva['cliente']}' ??
-                                  'Cliente sin nombre',
+                          title: Text('Cumpleañero: ${reserva['cliente']}',
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Color(0xFFFF6B81))),
                           subtitle: Text(
-                            '\nHorario: ${DateFormat.Hm().format(fecha)}\nTelefono: ${reserva['telefono'] ?? ''}\nCombo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? '-'}\nCombo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? '-'}\nPiñata: ${reserva['pinata'] ?? '-'}\nEstado de pago: ${reserva['estadoPago'] ?? '-'}\nSolicitud Especial: ${reserva['solicitudEspecial'] ?? 'Ninguna'}',
+                            '\nAdulto Responsable: ${reserva['adultoResponsable'] ?? 'Sin nombre'}\nHorario: ${DateFormat.Hm().format(fecha)}\nTelefono: ${reserva['telefono'] ?? ''}\nCantidad de niños: ${reserva['cantidadNinos'] ?? '-'}\nCantidad de adultos: ${reserva['cantidadAdultos'] ?? '-'}\nCombo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? '-'}\nCombo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? '-'}\nPiñata: ${reserva['pinata'] ?? '-'}\nEstado de pago: ${reserva['estadoPago'] ?? '-'}\nSolicitud Especial: ${reserva['solicitudEspecial'] ?? 'Ninguna'}',
                           ),
                           isThreeLine: true,
                           trailing: const Icon(Icons.event_note,

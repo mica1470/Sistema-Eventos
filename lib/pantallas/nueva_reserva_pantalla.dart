@@ -22,6 +22,8 @@ class NuevaReservaPantalla extends StatefulWidget {
 class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
   final formKey = GlobalKey<FormState>();
   final TextEditingController clienteController = TextEditingController();
+  final TextEditingController adultoResponsableController =
+      TextEditingController();
   final TextEditingController telefonoController = TextEditingController();
   final TextEditingController cantidadNinosController = TextEditingController();
   final TextEditingController cantidadAdultosController =
@@ -65,12 +67,13 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
 
     if (widget.reservaExistente != null) {
       final r = widget.reservaExistente!;
-      clienteController.text = r['nombreCumpleanero'] ?? '';
+      clienteController.text = r['cliente'] ?? '';
+      adultoResponsableController.text = r['adultoResponsable'] ?? '';
       telefonoController.text = r['telefono'] ?? '';
       cantidadNinosController.text = r['cantidadNinos']?.toString() ?? '';
       cantidadAdultosController.text = r['cantidadAdultos']?.toString() ?? '';
-      comboLunchAdultosController.text = r['comboLunchAdultos'] ?? '';
-      comboDulceAdultosController.text = r['comboDulceAdultos'] ?? '';
+      comboLunchAdultosSeleccionado = r['comboLunchAdultos'] ?? '';
+      comboDulceAdultosSeleccionado = r['comboDulceAdultos'] ?? '';
       solicitudEspecialController.text = r['solicitudEspecial'] ?? '';
       pinata = r['pinata'] ?? 'No';
       estadoPago = r['estadoPago'] ?? 'Pendiente';
@@ -228,6 +231,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
 
       final reservaData = {
         'cliente': clienteController.text,
+        'adultoResponsable': adultoResponsableController.text,
         'telefono': telefonoController.text,
         'cantidadNinos': int.tryParse(cantidadNinosController.text) ?? 0,
         'cantidadAdultos': int.tryParse(cantidadAdultosController.text) ?? 0,
@@ -402,6 +406,21 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                 validator: (val) => val!.isEmpty ? 'Requerido' : null,
               ),
               const SizedBox(height: 24),
+
+              TextFormField(
+                controller: adultoResponsableController,
+                decoration: const InputDecoration(
+                  labelText: 'Nombre del Adulto Responsable',
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Este campo es obligatorio';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 24),
               TextFormField(
                 controller: telefonoController,
                 decoration: const InputDecoration(labelText: 'Teléfono'),
@@ -555,6 +574,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
   @override
   void dispose() {
     clienteController.dispose();
+    adultoResponsableController.dispose();
     telefonoController.dispose();
     super.dispose();
   }

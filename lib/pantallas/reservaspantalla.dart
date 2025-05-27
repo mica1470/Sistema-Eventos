@@ -56,6 +56,8 @@ class ReservasPantalla extends StatelessWidget {
               final reserva = reservas[index].data() as Map<String, dynamic>;
               final id = reservas[index].id;
               final cliente = reserva['cliente'] ?? 'Cumpleañero desconocido';
+              final adultoResponsable = reserva['adultoResponsable'] ??
+                  'Adulto responsable desconocido';
               final telefono = reserva['telefono'] ?? 'Sin teléfono';
               final comboDulceAdultos =
                   reserva['comboDulceAdultos'] ?? 'Sin combo';
@@ -76,7 +78,7 @@ class ReservasPantalla extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
-                    'Fecha: ${fecha.day}/${fecha.month}/${fecha.year}\n• Telefono: $telefono\n• Combo Lunch Adultos: $comboLunchAdultos\n• Combo Dulce Adultos: $comboDulceAdultos\n• Piñata: $pinata\n• Pago: $estadoPago',
+                    '• Adulto Responsable: $adultoResponsable\n• Fecha: ${fecha.day}/${fecha.month}/${fecha.year}\n• Telefono: $telefono\n• Cantidad de niños: ${reserva['cantidadNinos'] ?? '-'}\n• Cantidad de adultos: ${reserva['cantidadAdultos'] ?? '-'}\n• Combo Lunch Adultos: $comboLunchAdultos\n• Combo Dulce Adultos: $comboDulceAdultos\n• Piñata: $pinata\n• Pago: $estadoPago',
                   ),
                   trailing: PopupMenuButton<String>(
                     onSelected: (value) {

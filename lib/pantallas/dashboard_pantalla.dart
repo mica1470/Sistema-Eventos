@@ -24,20 +24,20 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
   @override
   Widget build(BuildContext context) {
     final ancho = MediaQuery.of(context).size.width;
-    final esEscritorio = ancho >= 800;
+    final esEscritorio = ancho >= 600;
 
     final tituloStyle = GoogleFonts.poppins(
-      fontSize: esEscritorio ? 28 : 20,
+      fontSize: esEscritorio ? 25 : 20,
       fontWeight: FontWeight.bold,
       color: Colors.black87,
     );
     final cardTituloStyle = GoogleFonts.poppins(
       fontWeight: FontWeight.bold,
-      fontSize: esEscritorio ? 18 : 16,
+      fontSize: esEscritorio ? 16 : 15,
       color: Colors.black87,
     );
     final cardTextoStyle = GoogleFonts.poppins(
-      fontSize: esEscritorio ? 16 : 14,
+      fontSize: esEscritorio ? 14 : 13.5,
       color: Colors.grey[800],
     );
     return Scaffold(
@@ -55,7 +55,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
             Text(
               'Futuros Héroes',
               style: GoogleFonts.poppins(
-                color: Colors.black87,
+                color: const Color.fromARGB(221, 107, 85, 53),
                 fontWeight: FontWeight.bold,
                 fontSize: 22,
               ),
@@ -107,7 +107,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                         ),
                         constraints: const BoxConstraints(minWidth: 15),
                         child: Text(
-                          '${reservas.length}',
+                          '$proximasAVencer',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 11,
@@ -258,7 +258,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 15),
           _buildReservasGrid(cardTituloStyle, cardTextoStyle),
           TextButton(
             onPressed: () {
@@ -270,7 +270,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                 ? 'Ocultar algunas reservas'
                 : 'Ver todas las reservas'),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 28),
           Text('📦 Ítems de stock recientes', style: tituloStyle),
           const SizedBox(height: 12),
           _buildStockReciente(cardTituloStyle, cardTextoStyle),
@@ -427,20 +427,29 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(13),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Cumpleañero: ${reserva['cliente'] ?? ''}',
+                          Text(
+                              'Cumpleañero: ${reserva['cliente'] ?? ''} - Horario: $horario',
                               style: tituloStyle),
-                          const SizedBox(height: 8),
+                          Text(
+                              'Adulto Responsable: ${reserva['adultoResponsable'] ?? ''}',
+                              style: tituloStyle),
+                          Text(
+                              'Fecha: ${fecha.day}/${fecha.month}/${fecha.year}',
+                              style: tituloStyle),
+                          const SizedBox(height: 4),
                           Text('Telefono: ${reserva['telefono'] ?? ''}',
                               style: textoStyle),
                           Text(
-                              'Fecha: ${fecha.day}/${fecha.month}/${fecha.year}',
+                              'Cantidad Nro Niños: ${reserva['cantidadNinos'] ?? ''}',
                               style: textoStyle),
-                          Text('Horario: $horario', style: textoStyle),
+                          Text(
+                              'Cantidad Nro Adultos: ${reserva['cantidadAdultos'] ?? ''}',
+                              style: textoStyle),
                           Text(
                               'Combo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? ''}',
                               style: textoStyle),
@@ -518,10 +527,19 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                     pw.SizedBox(height: 6),
                     pw.Text('Cliente: ${reserva['cliente'] ?? ''}',
                         style: normal),
+                    pw.Text(
+                        'Adulto Responsable: ${reserva['adultoResponsable'] ?? ''}',
+                        style: normal),
                     pw.Text('Fecha: ${fecha.day}/${fecha.month}/${fecha.year}',
                         style: normal),
                     pw.Text('Horario: $horario', style: normal),
                     pw.Text('Telefono: ${reserva['telefono'] ?? ''}',
+                        style: normal),
+                    pw.Text(
+                        'Cantidad Nro Adultos: ${reserva['cantidadAdultos'] ?? ''}',
+                        style: normal),
+                    pw.Text(
+                        'Cantidad Nro Niños: ${reserva['cantidadNinos'] ?? ''}',
                         style: normal),
                     pw.Text(
                         'Combo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? ''}',
@@ -621,6 +639,45 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
     );
   }
 
+  void _mostrarOpcionesStock(
+      BuildContext context, String id, Map<String, dynamic> item) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Opciones para "${item['nombre'] ?? 'Producto'}"',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _eliminarStock(id);
+                },
+                icon: const Icon(Icons.delete),
+                label: const Text('Eliminar'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _eliminarStock(String id) async {
+    await FirebaseFirestore.instance.collection('stock').doc(id).delete();
+  }
+
   Widget _buildStockReciente(TextStyle tituloStyle, TextStyle textoStyle) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -649,7 +706,8 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                 childAspectRatio: 1.6,
               ),
               itemBuilder: (context, index) {
-                final data = items[index].data();
+                final doc = items[index];
+                final data = doc.data();
                 if (data is! Map<String, dynamic>) {
                   return Card(
                     color: const Color.fromARGB(167, 255, 107, 129),
@@ -661,27 +719,33 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                 }
 
                 final item = data;
-                return Card(
-                  color: const Color.fromARGB(167, 255, 107, 129),
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Nombre: ${item['nombre'] ?? ''}',
-                            style: tituloStyle),
-                        const SizedBox(height: 8),
-                        Text(
-                            'Categoría: ${item['categoria'] ?? 'Sin categoría'}',
-                            style: textoStyle),
-                        Text('Cantidad: ${item['cantidad'] ?? 0}',
-                            style: textoStyle),
-                      ],
+
+                return GestureDetector(
+                  onTap: () {
+                    _mostrarOpcionesStock(context, doc.id, item);
+                  },
+                  child: Card(
+                    color: const Color.fromARGB(167, 255, 107, 129),
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Nombre: ${item['nombre'] ?? ''}',
+                              style: tituloStyle),
+                          const SizedBox(height: 8),
+                          Text(
+                              'Categoría: ${item['categoria'] ?? 'Sin categoría'}',
+                              style: textoStyle),
+                          Text('Cantidad: ${item['cantidad'] ?? 0}',
+                              style: textoStyle),
+                        ],
+                      ),
                     ),
                   ),
                 );
