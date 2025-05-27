@@ -24,7 +24,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
   @override
   Widget build(BuildContext context) {
     final ancho = MediaQuery.of(context).size.width;
-    final esEscritorio = ancho >= 600;
+    final esEscritorio = ancho >= 900;
 
     final tituloStyle = GoogleFonts.poppins(
       fontSize: esEscritorio ? 25 : 20,
@@ -427,10 +427,13 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(13),
+                      padding: const EdgeInsets.all(22),
                       child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize:
+                            MainAxisSize.min, // 👈 Esto evita overflow
+                        crossAxisAlignment: CrossAxisAlignment
+                            .stretch, // 👈 Que el contenido use todo el ancho
+
                         children: [
                           Text(
                               'Fecha: ${fecha.day}/${fecha.month}/${fecha.year} - Hora: $horario',
@@ -458,13 +461,11 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                               style: textoStyle),
                           Text('Estado de pago: ${reserva['estadoPago'] ?? ''}',
                               style: textoStyle),
-                          Flexible(
-                            child: Text(
-                              'Solicitud Especial: ${reserva['solicitudEspecial'] ?? 'Ninguna'}',
-                              style: textoStyle,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                          Text(
+                            'Solicitud Especial: ${reserva['solicitudEspecial'] ?? 'Ninguna'}',
+                            style: textoStyle,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),

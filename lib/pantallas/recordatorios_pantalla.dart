@@ -129,7 +129,11 @@ class _RecordatoriosPantallaState extends State<RecordatoriosPantalla> {
               final data = doc.data() as Map<String, dynamic>;
               final fechaStr = data['fecha'] as String? ?? '';
               final cliente = data['cliente'] ?? 'Cumpleañero desconocido';
+              final adultoResponsable =
+                  data['adultoResponsable'] ?? 'Adulto desconocido';
               final telefono = data['telefono'] ?? 'Sin teléfono';
+              final cantidadNinos = data['cantidadNinos'] ?? 'Sin combo';
+              final cantidadAdultos = data['cantidadAdultos'] ?? 'Sin combo';
               final comboDulceAdultos =
                   data['comboDulceAdultos'] ?? 'Sin combo';
               final comboLunchAdultos =
@@ -145,7 +149,10 @@ class _RecordatoriosPantallaState extends State<RecordatoriosPantalla> {
                   title: Text('Reserva para $cliente'),
                   subtitle: Text(
                     'Fecha: ${formatearFecha(fechaStr)}\n'
+                    'Adulto Responsable: $adultoResponsable\n'
                     'Teléfono: $telefono\n'
+                    'Cantidad de Niños: $cantidadNinos\n'
+                    'Cantidad de Adultos: $cantidadAdultos\n'
                     'Combo Dulce Adultos: $comboDulceAdultos\n'
                     'Combo Lunch Adultos: $comboLunchAdultos\n'
                     'Piñata: $pinata\n'
