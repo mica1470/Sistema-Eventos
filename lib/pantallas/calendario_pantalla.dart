@@ -79,7 +79,7 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
   Future<void> _generarPdf() async {
     final pdf = pw.Document();
 
-    // Cargar las fuentes Poppins
+    // Cargar fuentes
     final poppinsRegularData =
         await rootBundle.load('assets/fonts/Poppins-Regular.ttf');
     final poppinsBoldData =
@@ -97,6 +97,7 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
     final semanas = <List<pw.Widget>>[];
     int diaActual = 1 - primerDiaSemana;
 
+    // Construcción del calendario
     while (diaActual <= diasDelMes) {
       final semana = <pw.Widget>[];
       for (int i = 0; i < 7; i++) {
@@ -143,6 +144,7 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
       semanas.add(semana);
     }
 
+    // Página 1: Calendario
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4.landscape,
@@ -153,10 +155,7 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
             children: [
               pw.Text(
                 'Calendario de Reservas - ${DateFormat.yMMMM('es').format(primerDiaMes)}',
-                style: pw.TextStyle(
-                  font: poppinsBold,
-                  fontSize: 20,
-                ),
+                style: pw.TextStyle(font: poppinsBold, fontSize: 20),
               ),
               pw.SizedBox(height: 12),
               pw.Row(
@@ -184,6 +183,102 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
       ),
     );
 
+    // Página 2: Listado de reservas del mes
+    final reservasListado = <Map<String, dynamic>>[];
+
+    for (int dia = 1; dia <= diasDelMes; dia++) {
+      final fecha = DateTime(anioActual, mesActual, dia);
+      final eventos = _eventos[_limpiarFecha(fecha)] ?? [];
+
+      for (final evento in eventos) {
+        reservasListado.add({
+          'fecha': DateTime.tryParse(evento['fecha']),
+          'cliente': evento['cliente'],
+          'adultoResponsable': evento['adultoResponsable'],
+          'telefono': evento['telefono'],
+          'cantidadNinos': evento['cantidadNinos'],
+          'cantidadAdultos': evento['cantidadAdultos'],
+          'comboDulceAdultos': evento['comboDulceAdultos'],
+          'comboLunchAdultos': evento['comboLunchAdultos'],
+          'pinata': evento['pinata'],
+          'estadoPago': evento['estadoPago'],
+          'solicitudEspecial': evento['solicitudEspecial'],
+        });
+      }
+    }
+
+    reservasListado.removeWhere((reserva) => reserva['fecha'] == null);
+
+    reservasListado.sort((a, b) {
+      final fechaA = a['fecha'] as DateTime;
+      final fechaB = b['fecha'] as DateTime;
+      return fechaA.compareTo(fechaB);
+    });
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(40),
+        build: (context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                'Listado de Reservas - ${DateFormat.yMMMM('es').format(primerDiaMes)}',
+                style: pw.TextStyle(font: poppinsBold, fontSize: 20),
+              ),
+              pw.SizedBox(height: 16),
+              ...reservasListado.map((evento) {
+                final fecha = evento['fecha'] as DateTime;
+                const normal = pw.TextStyle(fontSize: 14);
+
+                return pw.Padding(
+                  padding: const pw.EdgeInsets.only(bottom: 8),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text('Reserva de ${evento['cliente']}',
+                          style: pw.TextStyle(
+                              fontSize: 18, fontWeight: pw.FontWeight.bold)),
+                      pw.SizedBox(height: 6),
+                      pw.Text(
+                          'Fecha: ${DateFormat('dd/MM/yyyy - HH:mm').format(fecha)}',
+                          style: normal),
+                      pw.Text(
+                          'Adulto Responsable: ${evento['adultoResponsable'] ?? ''}',
+                          style: normal),
+                      pw.Text('Telefono: ${evento['telefono'] ?? ''}',
+                          style: normal),
+                      pw.Text(
+                          'Cantidad Nro Adultos: ${evento['cantidadAdultos'] ?? ''}',
+                          style: normal),
+                      pw.Text(
+                          'Cantidad Nro Niños: ${evento['cantidadNinos'] ?? ''}',
+                          style: normal),
+                      pw.Text(
+                          'Combo Lunch Adultos: ${evento['comboLunchAdultos'] ?? ''}',
+                          style: normal),
+                      pw.Text(
+                          'Combo Dulce Adultos: ${evento['comboDulceAdultos'] ?? ''}',
+                          style: normal),
+                      pw.Text('Piñata: ${evento['pinata'] ?? ''}',
+                          style: normal),
+                      pw.Text(
+                          'Solicitud Especial: ${evento['solicitudEspecial'] ?? 'Ninguna'}',
+                          style: normal),
+                      pw.Text('Estado de pago: ${evento['estadoPago'] ?? ''}',
+                          style: normal),
+                    ],
+                  ),
+                );
+              }),
+            ],
+          );
+        },
+      ),
+    );
+
+    // Guardar PDF
     final bytes = await pdf.save();
     final blob = html.Blob([bytes], 'application/pdf');
     final url = html.Url.createObjectUrlFromBlob(blob);

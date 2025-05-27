@@ -521,17 +521,15 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text('Reserva ID: ${reserva['id'] ?? ''}',
+                    pw.Text('Reserva de ${reserva['cliente'] ?? ''}',
                         style: subtitulo),
                     pw.SizedBox(height: 6),
-                    pw.Text('Cliente: ${reserva['cliente'] ?? ''}',
-                        style: normal),
-                    pw.Text(
-                        'Adulto Responsable: ${reserva['adultoResponsable'] ?? ''}',
-                        style: normal),
                     pw.Text('Fecha: ${fecha.day}/${fecha.month}/${fecha.year}',
                         style: normal),
                     pw.Text('Horario: $horario', style: normal),
+                    pw.Text(
+                        'Adulto Responsable: ${reserva['adultoResponsable'] ?? ''}',
+                        style: normal),
                     pw.Text('Telefono: ${reserva['telefono'] ?? ''}',
                         style: normal),
                     pw.Text(

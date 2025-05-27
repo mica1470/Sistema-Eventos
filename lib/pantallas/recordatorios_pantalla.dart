@@ -147,17 +147,15 @@ class _RecordatoriosPantallaState extends State<RecordatoriosPantalla> {
                 child: ListTile(
                   leading: const Icon(Icons.warning, color: Colors.deepOrange),
                   title: Text('Reserva para $cliente'),
-                  subtitle: Text(
-                    'Fecha: ${formatearFecha(fechaStr)}\n'
-                    'Adulto Responsable: $adultoResponsable\n'
-                    'Teléfono: $telefono\n'
-                    'Cantidad de Niños: $cantidadNinos\n'
-                    'Cantidad de Adultos: $cantidadAdultos\n'
-                    'Combo Dulce Adultos: $comboDulceAdultos\n'
-                    'Combo Lunch Adultos: $comboLunchAdultos\n'
-                    'Piñata: $pinata\n'
-                    'Estado de Pago: $estado',
-                  ),
+                  subtitle: Text('Fecha: ${formatearFecha(fechaStr)}\n'
+                      'Adulto Responsable: $adultoResponsable\n'
+                      'Teléfono: $telefono\n'
+                      'Cantidad de Niños: $cantidadNinos\n'
+                      'Cantidad de Adultos: $cantidadAdultos\n'
+                      'Combo Dulce Adultos: $comboDulceAdultos\n'
+                      'Combo Lunch Adultos: $comboLunchAdultos\n'
+                      'Piñata: $pinata\n'
+                      'Estado de Pago: $estado\n'),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
                     tooltip: 'Eliminar recordatorio',
