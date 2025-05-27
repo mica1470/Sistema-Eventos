@@ -33,11 +33,11 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
     );
     final cardTituloStyle = GoogleFonts.poppins(
       fontWeight: FontWeight.bold,
-      fontSize: esEscritorio ? 16 : 15,
+      fontSize: esEscritorio ? 18 : 16,
       color: Colors.black87,
     );
     final cardTextoStyle = GoogleFonts.poppins(
-      fontSize: esEscritorio ? 14 : 13.5,
+      fontSize: esEscritorio ? 16 : 14,
       color: Colors.grey[800],
     );
     return Scaffold(
@@ -382,11 +382,11 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: reservasFiltradas.length,
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 500, // El ancho máximo de cada tarjeta
+                maxCrossAxisExtent: 440,
                 mainAxisSpacing: 14,
                 crossAxisSpacing: 14,
-                childAspectRatio:
-                    1.6, // Puedes ajustar este valor a 1.6 o 2 según lo que necesites
+                // Ojo con childAspectRatio fijo, mejor quitar o poner uno dinámico
+                // childAspectRatio: 1.6,
               ),
               itemBuilder: (context, index) {
                 final data = reservasFiltradas[index].data();
@@ -433,14 +433,12 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                              'Cumpleañero: ${reserva['cliente'] ?? ''} - Horario: $horario',
+                              'Fecha: ${fecha.day}/${fecha.month}/${fecha.year} - Hora: $horario',
                               style: tituloStyle),
-                          Text(
-                              'Adulto Responsable: ${reserva['adultoResponsable'] ?? ''}',
+                          Text('Cumpleañero: ${reserva['cliente'] ?? ''}',
                               style: tituloStyle),
-                          Text(
-                              'Fecha: ${fecha.day}/${fecha.month}/${fecha.year}',
-                              style: tituloStyle),
+                          Text('Adulto: ${reserva['adultoResponsable'] ?? ''}',
+                              style: textoStyle),
                           const SizedBox(height: 4),
                           Text('Telefono: ${reserva['telefono'] ?? ''}',
                               style: textoStyle),
