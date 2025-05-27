@@ -7,6 +7,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CalendarioPantalla extends StatefulWidget {
   const CalendarioPantalla({super.key});
@@ -78,81 +79,121 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
   Future<void> _generarPdf() async {
     final pdf = pw.Document();
 
+    // Cargar las fuentes Poppins
+    final poppinsRegularData =
+        await rootBundle.load('assets/fonts/Poppins-Regular.ttf');
+    final poppinsBoldData =
+        await rootBundle.load('assets/fonts/Poppins-Bold.ttf');
+
+    final poppinsRegular = pw.Font.ttf(poppinsRegularData.buffer.asByteData());
+    final poppinsBold = pw.Font.ttf(poppinsBoldData.buffer.asByteData());
+
     final mesActual = _diaEnfocado.month;
     final anioActual = _diaEnfocado.year;
-    final fontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');
-    final ttf = pw.Font.ttf(fontData.buffer.asByteData());
+    final primerDiaMes = DateTime(anioActual, mesActual, 1);
+    final primerDiaSemana = primerDiaMes.weekday % 7;
 
-    final eventosMes = _eventos.entries.where((entry) {
-      final fecha = entry.key;
-      return fecha.month == mesActual && fecha.year == anioActual;
-    }).toList();
+    final diasDelMes = DateUtils.getDaysInMonth(anioActual, mesActual);
+    final semanas = <List<pw.Widget>>[];
+    int diaActual = 1 - primerDiaSemana;
 
-    if (eventosMes.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('No hay reservas este mes para imprimir.')),
-      );
-      return;
+    while (diaActual <= diasDelMes) {
+      final semana = <pw.Widget>[];
+      for (int i = 0; i < 7; i++) {
+        if (diaActual < 1 || diaActual > diasDelMes) {
+          semana.add(pw.Expanded(child: pw.Container()));
+        } else {
+          final fecha = DateTime(anioActual, mesActual, diaActual);
+          final eventos = _eventos[_limpiarFecha(fecha)] ?? [];
+          semana.add(
+            pw.Expanded(
+              child: pw.Container(
+                margin: const pw.EdgeInsets.all(2),
+                padding: const pw.EdgeInsets.all(4),
+                height: 85,
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(color: PdfColors.pink400),
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      '$diaActual',
+                      style: pw.TextStyle(
+                        font: poppinsBold,
+                        fontSize: 12,
+                      ),
+                    ),
+                    pw.SizedBox(height: 2),
+                    ...eventos.map((evento) => pw.Text(
+                          '• ${evento['cliente']} - ${DateFormat.Hm().format(DateTime.tryParse(evento['fecha']) ?? DateTime.now())} \n- Adulto: ${evento['adultoResponsable']}',
+                          style: pw.TextStyle(
+                            font: poppinsRegular,
+                            fontSize: 10,
+                          ),
+                        )),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+        diaActual++;
+      }
+      semanas.add(semana);
     }
 
     pdf.addPage(
-      pw.MultiPage(
-        theme: pw.ThemeData.withFont(base: ttf),
-        pageFormat: PdfPageFormat.a4,
-        build: (context) => [
-          pw.Header(
-            level: 0,
-            child: pw.Text(
-              'Reservas para el mes',
-              style: const pw.TextStyle(fontSize: 24),
-            ),
-          ),
-          ...eventosMes.map((entry) {
-            final fecha = entry.key;
-            final reservas = entry.value;
-
-            return pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text(DateFormat.yMMMMd('es').format(fecha),
-                    style: pw.TextStyle(
-                        fontSize: 18, fontWeight: pw.FontWeight.bold)),
-                pw.SizedBox(height: 5),
-                pw.Column(
-                  children: reservas.map((reserva) {
-                    final fechaReserva = reserva['fecha'] is Timestamp
-                        ? (reserva['fecha'] as Timestamp).toDate()
-                        : DateTime.tryParse(reserva['fecha']) ?? DateTime.now();
-
-                    final horario = DateFormat.Hm().format(fechaReserva);
-
-                    return pw.Bullet(
-                      text:
-                          '${reserva['cliente'] ?? 'Sin nombre'} - $horario\nAdulto Responsable: ${reserva['adultoResponsable'] ?? 'Sin nombre'} \nTelefono: ${reserva['telefono'] ?? ''}\nCantidad de niños: ${reserva['cantidadNinos'] ?? '-'}\nCantidad de adultos: ${reserva['cantidadAdultos'] ?? '-'}\nCombo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? '-'}\nCombo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? '-'}\nPiñata: ${reserva['pinata'] ?? '-'}\nEstado de pago: ${reserva['estadoPago'] ?? '-'}\nSolicitud Especial: ${reserva['solicitudEspecial'] ?? 'Ninguna'}',
-                    );
-                  }).toList(),
+      pw.Page(
+        pageFormat: PdfPageFormat.a4.landscape,
+        margin: const pw.EdgeInsets.all(20),
+        build: (context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                'Calendario de Reservas - ${DateFormat.yMMMM('es').format(primerDiaMes)}',
+                style: pw.TextStyle(
+                  font: poppinsBold,
+                  fontSize: 20,
                 ),
-                pw.SizedBox(height: 15),
-              ],
-            );
-          }).toList(),
-        ],
+              ),
+              pw.SizedBox(height: 12),
+              pw.Row(
+                children: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+                    .map((d) => pw.Expanded(
+                          child: pw.Text(
+                            d,
+                            textAlign: pw.TextAlign.center,
+                            style: pw.TextStyle(
+                              font: poppinsBold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ))
+                    .toList(),
+              ),
+              pw.Divider(),
+              ...semanas.map((semana) => pw.Row(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: semana,
+                  )),
+            ],
+          );
+        },
       ),
     );
 
     final bytes = await pdf.save();
-
     final blob = html.Blob([bytes], 'application/pdf');
     final url = html.Url.createObjectUrlFromBlob(blob);
     final anchor = html.document.createElement('a') as html.AnchorElement
       ..href = url
       ..style.display = 'none'
-      ..download = 'reservas_mes.pdf';
+      ..download = 'calendario_reservas_${mesActual}_$anioActual.pdf';
 
     html.document.body!.append(anchor);
     anchor.click();
-
     anchor.remove();
     html.Url.revokeObjectUrl(url);
   }
