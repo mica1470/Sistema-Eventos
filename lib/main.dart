@@ -74,9 +74,9 @@ class EventosInfantilesApp extends StatelessWidget {
           final settings = ModalRoute.of(context)!.settings;
           return NuevaReservaPantalla.fromRouteSettings(settings);
         },
-        '/recordatorios': (context) => RecordatoriosPantalla(),
+        '/recordatorios': (context) => const RecordatoriosPantalla(),
         '/stock': (context) => const StockPantalla(),
-        '/calendario': (context) => CalendarioPantalla(),
+        '/calendario': (context) => const CalendarioPantalla(),
         '/configuracion': (context) => const ConfiguracionPantalla(),
       },
     );

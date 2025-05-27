@@ -7,7 +7,6 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:intl/intl.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class CalendarioPantalla extends StatefulWidget {
   const CalendarioPantalla({super.key});
@@ -225,49 +224,71 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
             children: [
               pw.Text(
                 'Listado de Reservas - ${DateFormat.yMMMM('es').format(primerDiaMes)}',
-                style: pw.TextStyle(font: poppinsBold, fontSize: 20),
+                style: pw.TextStyle(font: poppinsBold, fontSize: 22),
               ),
-              pw.SizedBox(height: 16),
+              pw.SizedBox(height: 20),
               ...reservasListado.map((evento) {
                 final fecha = evento['fecha'] as DateTime;
-                const normal = pw.TextStyle(fontSize: 14);
 
-                return pw.Padding(
-                  padding: const pw.EdgeInsets.only(bottom: 8),
+                return pw.Container(
+                  margin: const pw.EdgeInsets.only(bottom: 14),
+                  padding: const pw.EdgeInsets.all(12),
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(color: PdfColors.pink400),
+                    borderRadius: pw.BorderRadius.circular(8),
+                    color: PdfColors.pink50,
+                  ),
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text('Reserva de ${evento['cliente']}',
-                          style: pw.TextStyle(
-                              fontSize: 18, fontWeight: pw.FontWeight.bold)),
+                      pw.Text(
+                        'Cumpleañero: ${evento['cliente']}',
+                        style: pw.TextStyle(
+                          font: poppinsBold,
+                          fontSize: 16,
+                        ),
+                      ),
                       pw.SizedBox(height: 6),
                       pw.Text(
-                          'Fecha: ${DateFormat('dd/MM/yyyy - HH:mm').format(fecha)}',
-                          style: normal),
+                        'Fecha: ${DateFormat('dd/MM/yyyy').format(fecha)} |  Hora: ${DateFormat.Hm().format(fecha)}',
+                        style: pw.TextStyle(font: poppinsRegular, fontSize: 12),
+                      ),
                       pw.Text(
-                          'Adulto Responsable: ${evento['adultoResponsable'] ?? ''}',
-                          style: normal),
-                      pw.Text('Telefono: ${evento['telefono'] ?? ''}',
-                          style: normal),
+                        'Adulto Responsable: ${evento['adultoResponsable']}',
+                        style: pw.TextStyle(font: poppinsRegular, fontSize: 12),
+                      ),
                       pw.Text(
-                          'Cantidad Nro Adultos: ${evento['cantidadAdultos'] ?? ''}',
-                          style: normal),
+                        'Teléfono: ${evento['telefono']}',
+                        style: pw.TextStyle(font: poppinsRegular, fontSize: 12),
+                      ),
                       pw.Text(
-                          'Cantidad Nro Niños: ${evento['cantidadNinos'] ?? ''}',
-                          style: normal),
+                        'Niños: ${evento['cantidadNinos']}  |  Adultos: ${evento['cantidadAdultos']}',
+                        style: pw.TextStyle(font: poppinsRegular, fontSize: 12),
+                      ),
                       pw.Text(
-                          'Combo Lunch Adultos: ${evento['comboLunchAdultos'] ?? ''}',
-                          style: normal),
+                        'Combo Lunch Adultos: ${evento['comboLunchAdultos']}',
+                        style: pw.TextStyle(font: poppinsRegular, fontSize: 12),
+                      ),
                       pw.Text(
-                          'Combo Dulce Adultos: ${evento['comboDulceAdultos'] ?? ''}',
-                          style: normal),
-                      pw.Text('Piñata: ${evento['pinata'] ?? ''}',
-                          style: normal),
+                        'Combo Dulce Adultos: ${evento['comboDulceAdultos']}',
+                        style: pw.TextStyle(font: poppinsRegular, fontSize: 12),
+                      ),
                       pw.Text(
-                          'Solicitud Especial: ${evento['solicitudEspecial'] ?? 'Ninguna'}',
-                          style: normal),
-                      pw.Text('Estado de pago: ${evento['estadoPago'] ?? ''}',
-                          style: normal),
+                        'Piñata: ${evento['pinata']}',
+                        style: pw.TextStyle(font: poppinsRegular, fontSize: 12),
+                      ),
+                      pw.Text(
+                        'Solicitud Especial: ${evento['solicitudEspecial'] ?? 'Ninguna'}',
+                        style: pw.TextStyle(font: poppinsRegular, fontSize: 12),
+                      ),
+                      pw.Text(
+                        'Estado de pago: ${evento['estadoPago']}',
+                        style: pw.TextStyle(
+                          font: poppinsBold,
+                          fontSize: 12,
+                          color: PdfColors.green800,
+                        ),
+                      ),
                     ],
                   ),
                 );

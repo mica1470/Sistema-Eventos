@@ -1,5 +1,8 @@
+// ignore_for_file: unnecessary_to_list_in_spreads, avoid_web_libraries_in_flutter
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -483,18 +486,28 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
   Future<void> _generarPdf(List<Map<String, dynamic>> reservas) async {
     final pdf = pw.Document();
 
-    final titulo = pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold);
-    final subtitulo =
-        pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold);
-    const normal = pw.TextStyle(fontSize: 14);
+    // Cargar fuentes
+    final poppinsRegularData =
+        await rootBundle.load('assets/fonts/Poppins-Regular.ttf');
+    final poppinsBoldData =
+        await rootBundle.load('assets/fonts/Poppins-Bold.ttf');
+    final poppinsRegular = pw.Font.ttf(poppinsRegularData.buffer.asByteData());
+    final poppinsBold = pw.Font.ttf(poppinsBoldData.buffer.asByteData());
+    final emojiFontData =
+        await rootBundle.load('assets/fonts/NotoColorEmoji-Regular.ttf');
+    final emojiFont = pw.Font.ttf(emojiFontData.buffer.asByteData());
 
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
         build: (context) {
           return [
-            pw.Text('Listado de Reservas', style: titulo),
-            pw.SizedBox(height: 20),
+            pw.Text(
+              'Listado de Reservas',
+              style: pw.TextStyle(font: poppinsBold, fontSize: 24),
+            ),
+            pw.SizedBox(height: 22),
             ...reservas.map((reserva) {
               DateTime fecha;
               final dynamic fechaRaw = reserva['fecha'];
@@ -505,52 +518,94 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               } else {
                 fecha = DateTime.now();
               }
-              final fechaReserva = reserva['fecha'] is Timestamp
-                  ? (reserva['fecha'] as Timestamp).toDate()
-                  : DateTime.tryParse(reserva['fecha']) ?? DateTime.now();
 
-              final horario = DateFormat.Hm().format(fechaReserva);
+              final horario = DateFormat.Hm().format(fecha);
+
               return pw.Container(
                 margin: const pw.EdgeInsets.only(bottom: 12),
-                padding: const pw.EdgeInsets.all(12),
+                padding: const pw.EdgeInsets.all(14),
                 decoration: pw.BoxDecoration(
-                  border: pw.Border.all(color: PdfColors.grey300),
-                  borderRadius: pw.BorderRadius.circular(8),
-                  color: PdfColors.blue50,
+                  color: PdfColors.grey100,
+                  border: pw.Border.all(color: PdfColors.grey400),
+                  borderRadius: pw.BorderRadius.circular(10),
                 ),
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text('Reserva de ${reserva['cliente'] ?? ''}',
-                        style: subtitulo),
+                    pw.Text(
+                      'Cumpleañero: ${reserva['cliente'] ?? ''}',
+                      style: pw.TextStyle(
+                        font: poppinsBold,
+                        fontSize: 16,
+                        fontFallback: [emojiFont],
+                      ),
+                    ),
                     pw.SizedBox(height: 6),
-                    pw.Text('Fecha: ${fecha.day}/${fecha.month}/${fecha.year}',
-                        style: normal),
-                    pw.Text('Horario: $horario', style: normal),
+                    pw.Text('Fecha: ${DateFormat('dd/MM/yyyy').format(fecha)}',
+                        style: pw.TextStyle(
+                          font: poppinsRegular,
+                          fontSize: 12,
+                          fontFallback: [emojiFont],
+                        )),
+                    pw.Text('Horario: $horario',
+                        style: pw.TextStyle(
+                          font: poppinsRegular,
+                          fontSize: 12,
+                          fontFallback: [emojiFont],
+                        )),
                     pw.Text(
                         'Adulto Responsable: ${reserva['adultoResponsable'] ?? ''}',
-                        style: normal),
-                    pw.Text('Telefono: ${reserva['telefono'] ?? ''}',
-                        style: normal),
+                        style: pw.TextStyle(
+                          font: poppinsRegular,
+                          fontSize: 12,
+                          fontFallback: [emojiFont],
+                        )),
+                    pw.Text('Teléfono: ${reserva['telefono'] ?? ''}',
+                        style: pw.TextStyle(
+                          font: poppinsRegular,
+                          fontSize: 12,
+                          fontFallback: [emojiFont],
+                        )),
                     pw.Text(
-                        'Cantidad Nro Adultos: ${reserva['cantidadAdultos'] ?? ''}',
-                        style: normal),
+                        'Cantidad de Niños: ${reserva['cantidadNinos'] ?? '-'} | Adultos: ${reserva['cantidadAdultos'] ?? '-'}',
+                        style: pw.TextStyle(
+                          font: poppinsRegular,
+                          fontSize: 12,
+                          fontFallback: [emojiFont],
+                        )),
                     pw.Text(
-                        'Cantidad Nro Niños: ${reserva['cantidadNinos'] ?? ''}',
-                        style: normal),
+                        'Combo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? '-'}',
+                        style: pw.TextStyle(
+                          font: poppinsRegular,
+                          fontSize: 12,
+                          fontFallback: [emojiFont],
+                        )),
                     pw.Text(
-                        'Combo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? ''}',
-                        style: normal),
+                        'Combo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? '-'}',
+                        style: pw.TextStyle(
+                          font: poppinsRegular,
+                          fontSize: 12,
+                          fontFallback: [emojiFont],
+                        )),
+                    pw.Text('Piñata: ${reserva['pinata'] ?? 'No'}',
+                        style: pw.TextStyle(
+                          font: poppinsRegular,
+                          fontSize: 12,
+                          fontFallback: [emojiFont],
+                        )),
                     pw.Text(
-                        'Combo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? ''}',
-                        style: normal),
-                    pw.Text('Piñata: ${reserva['pinata'] ?? ''}',
-                        style: normal),
-                    pw.Text(
-                        'Solicitud Especial: ${reserva['solicitudEspecial'] ?? 'Ninguna'}',
-                        style: normal),
+                        'Solicitud Especial: ${reserva['solicitudEspecial']?.toString().trim().isEmpty == false ? reserva['solicitudEspecial'] : 'Ninguna'}',
+                        style: pw.TextStyle(
+                          font: poppinsRegular,
+                          fontSize: 12,
+                          fontFallback: [emojiFont],
+                        )),
                     pw.Text('Estado de pago: ${reserva['estadoPago'] ?? ''}',
-                        style: normal),
+                        style: pw.TextStyle(
+                            font: poppinsBold,
+                            fontSize: 12,
+                            fontFallback: [emojiFont],
+                            color: PdfColors.green800)),
                   ],
                 ),
               );
@@ -560,7 +615,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
       ),
     );
 
-    // Para Flutter web: abrir el pdf en otra pestaña
+    // Guardar PDF y abrir en nueva pestaña (Flutter Web)
     final bytes = await pdf.save();
     final blob = html.Blob([bytes], 'application/pdf');
     final url = html.Url.createObjectUrlFromBlob(blob);

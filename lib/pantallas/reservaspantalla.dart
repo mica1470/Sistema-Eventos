@@ -22,7 +22,7 @@ class ReservasPantalla extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.add),
             tooltip: 'Nueva Reserva',
-            color: Color(0xFFFF6B81), // Rosa coral
+            color: const Color(0xFFFF6B81), // Rosa coral
             onPressed: () {
               Navigator.pushNamed(context, '/nueva-reserva');
             },

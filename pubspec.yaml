@@ -66,10 +66,9 @@ flutter:
     - assets/fonts/Roboto-Regular.ttf
     - assets/imagen.jpg
     - assets/google_logo.png
-    - assets\fonts\Poppins-Regular.ttf
-    - assets\fonts\Poppins-Bold.ttf
     - assets/fonts/Poppins-Bold.ttf
     - assets/fonts/Poppins-Regular.ttf
+    - assets/fonts/NotoColorEmoji-Regular.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:
