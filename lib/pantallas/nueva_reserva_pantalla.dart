@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class NuevaReservaPantalla extends StatefulWidget {
   final Map<String, dynamic>? reservaExistente;
@@ -25,15 +24,19 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
   final TextEditingController adultoResponsableController =
       TextEditingController();
   final TextEditingController telefonoController = TextEditingController();
+  final TextEditingController importeController = TextEditingController();
   final TextEditingController cantidadNinosController = TextEditingController();
   final TextEditingController cantidadAdultosController =
       TextEditingController();
   final TextEditingController comboLunchAdultosController =
       TextEditingController();
+  final TextEditingController cantidadLunchAdultosController =
+      TextEditingController();
   final TextEditingController comboDulceAdultosController =
       TextEditingController();
   final TextEditingController solicitudEspecialController =
       TextEditingController();
+  final TextEditingController pagosController = TextEditingController();
   String pinata = 'No';
   Map<DateTime, bool> diasDisponibles = {};
   DateTime? fecha;
@@ -41,12 +44,10 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
   TimeOfDay? horaFin;
   String estadoPago = 'Pendiente';
   List<String> horariosOcupados = [];
-  List<String> combos = []; // Importante que esté vacío al inicio
   bool cargando = false;
-  List<String> combosLunchAdultos = [];
-  List<String> combosDulceAdultos = [];
+  String comboLunchAdultos = 'Combo Clásico';
+  String comboDulceAdultos = 'No';
   String? comboLunchAdultosSeleccionado;
-  String? comboDulceAdultosSeleccionado;
 
   final List<Map<String, TimeOfDay>> horariosDisponibles = [
     {
@@ -69,14 +70,20 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
       final r = widget.reservaExistente!;
       clienteController.text = r['cliente'] ?? '';
       adultoResponsableController.text = r['adultoResponsable'] ?? '';
-      telefonoController.text = r['telefono'] ?? '';
+      telefonoController.text = r['telefono'] ?? 'Sin teléfono';
       cantidadNinosController.text = r['cantidadNinos']?.toString() ?? '';
       cantidadAdultosController.text = r['cantidadAdultos']?.toString() ?? '';
-      comboLunchAdultosSeleccionado = r['comboLunchAdultos'] ?? '';
-      comboDulceAdultosSeleccionado = r['comboDulceAdultos'] ?? '';
-      solicitudEspecialController.text = r['solicitudEspecial'] ?? '';
+      comboLunchAdultosController.text = r['comboLunchAdultos'] ?? 'Sin combo';
+      cantidadLunchAdultosController.text =
+          r['cantidadLunchAdultos']?.toString() ?? '';
+      comboDulceAdultosController.text = r['comboDulceAdultos'] ?? 'Sin combo';
+      solicitudEspecialController.text =
+          r['solicitudEspecial'] ?? 'Sin solicitud especial';
+      pagosController.text = r['pagos'] ?? 'Sin descripción de pago';
       pinata = r['pinata'] ?? 'No';
       estadoPago = r['estadoPago'] ?? 'Pendiente';
+      importeController.text = r['importe']?.toString() ?? '';
+
       final fechaStr = r['fecha'] ?? '';
       fecha = DateTime.tryParse(fechaStr);
       if (fecha != null) {
@@ -91,65 +98,6 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
         );
       }
     }
-    cargarCombosDesdePrefs(
-        'combosLunchAdultos', (lista) => combosLunchAdultos = lista);
-    cargarCombosDesdePrefs(
-        'combosDulceAdultos', (lista) => combosDulceAdultos = lista);
-  }
-
-  Future<void> cargarCombosDesdePrefs(
-      String key, void Function(List<String>) setLista) async {
-    final prefs = await SharedPreferences.getInstance();
-    final lista = prefs.getStringList(key);
-    setState(() {
-      final opciones = lista ?? ['Agregar nuevo'];
-      if (!opciones.contains('Agregar nuevo')) {
-        opciones.add('Agregar nuevo');
-      }
-      setLista(opciones);
-    });
-  }
-
-  void agregarNuevoCombo(
-    String prefsKey,
-    List<String> lista,
-    void Function(String) onNuevoValor,
-  ) {
-    final controller = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Agregar nueva opción'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(labelText: 'Nueva opción'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final nuevo = controller.text.trim();
-              if (nuevo.isNotEmpty) {
-                setState(() {
-                  lista.insert(lista.length - 1, nuevo);
-                  onNuevoValor(nuevo); // Actualiza el seleccionado
-                });
-
-                final prefs = await SharedPreferences.getInstance();
-                prefs.setStringList(prefsKey,
-                    lista.where((e) => e != 'Agregar nuevo').toList());
-
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Guardar'),
-          ),
-        ],
-      ),
-    );
   }
 
   DateTime normalizarFecha(DateTime fecha) {
@@ -235,11 +183,15 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
         'telefono': telefonoController.text,
         'cantidadNinos': int.tryParse(cantidadNinosController.text) ?? 0,
         'cantidadAdultos': int.tryParse(cantidadAdultosController.text) ?? 0,
-        'comboLunchAdultos': comboLunchAdultosSeleccionado ?? '',
-        'comboDulceAdultos': comboDulceAdultosSeleccionado ?? '',
+        'comboLunchAdultos': comboLunchAdultos,
+        'cantidadLunchAdultos':
+            int.tryParse(cantidadLunchAdultosController.text) ?? 0,
+        'comboDulceAdultos': comboDulceAdultos,
         'pinata': pinata,
         'solicitudEspecial': solicitudEspecialController.text,
+        'pagos': pagosController.text,
         'estadoPago': estadoPago,
+        'importe': int.tryParse(importeController.text) ?? 0,
         'fecha': fechaHora.toIso8601String(),
         'horaFin':
             '${horaFin!.hour.toString().padLeft(2, '0')}:${horaFin!.minute.toString().padLeft(2, '0')}',
@@ -398,7 +350,6 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                 ),
               ),
               const SizedBox(height: 24),
-
               TextFormField(
                 controller: clienteController,
                 decoration:
@@ -406,7 +357,6 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                 validator: (val) => val!.isEmpty ? 'Requerido' : null,
               ),
               const SizedBox(height: 24),
-
               TextFormField(
                 controller: adultoResponsableController,
                 decoration: const InputDecoration(
@@ -419,7 +369,6 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                   return null;
                 },
               ),
-
               const SizedBox(height: 24),
               TextFormField(
                 controller: telefonoController,
@@ -442,94 +391,70 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 24),
-              // Campo para agregar nuevo combo
-              Row(
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: comboLunchAdultosSeleccionado,
-                      onChanged: (valor) {
-                        if (valor == 'Agregar nuevo') {
-                          agregarNuevoCombo(
-                            'combosLunchAdultos',
-                            combosLunchAdultos,
-                            (nuevoValor) {
-                              setState(() {
-                                comboLunchAdultosSeleccionado = nuevoValor;
-                              });
-                            },
-                          );
-                        } else {
-                          setState(() {
-                            comboLunchAdultosSeleccionado = valor;
-                          });
-                        }
-                      },
-                      items: combosLunchAdultos
-                          .map((combo) => DropdownMenuItem(
-                                value: combo,
-                                child: Text(combo),
-                              ))
-                          .toList(),
-                      decoration: const InputDecoration(
-                        labelText: 'Combo Lunch para Adultos',
-                      ),
-                      validator: (val) => val == null || val.isEmpty
-                          ? 'Seleccione un Combo Lunch para Adultos'
-                          : null,
-                    ),
-                  ),
-                ],
+              DropdownButtonFormField<String>(
+                value: comboLunchAdultos,
+                items: ['Combo Clásico', 'Combo Gourmet', 'Trae comida', 'Otro']
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
+                onChanged: (val) {
+                  setState(() {
+                    comboLunchAdultos = val!;
+                  });
+                },
+                decoration:
+                    const InputDecoration(labelText: 'Combo Lunch Adultos'),
               ),
               const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: comboDulceAdultosSeleccionado,
-                      onChanged: (valor) {
-                        if (valor == 'Agregar nuevo') {
-                          agregarNuevoCombo(
-                            'combosDulceAdultos',
-                            combosDulceAdultos,
-                            (nuevoValor) {
-                              setState(() {
-                                comboDulceAdultosSeleccionado = nuevoValor;
-                              });
-                            },
-                          );
-                        } else {
-                          setState(() {
-                            comboDulceAdultosSeleccionado = valor;
-                          });
-                        }
-                      },
-                      items: combosDulceAdultos
-                          .map((combo) => DropdownMenuItem(
-                                value: combo,
-                                child: Text(combo),
-                              ))
-                          .toList(),
-                      decoration: const InputDecoration(
-                        labelText: 'Combo Dulce para Adultos',
-                      ),
-                      validator: (val) => val == null || val.isEmpty
-                          ? 'Seleccione un Combo Dulce para Adultos'
-                          : null,
-                    ),
-                  ),
-                ],
+              TextFormField(
+                controller: cantidadLunchAdultosController,
+                decoration: const InputDecoration(
+                    labelText: 'Cantidad de Lunch Adultos'),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 24),
+              DropdownButtonFormField<String>(
+                value: comboDulceAdultos,
+                items: ['Si', 'No']
+                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .toList(),
+                onChanged: (val) {
+                  setState(() {
+                    comboDulceAdultos = val!;
+                  });
+                },
+                decoration:
+                    const InputDecoration(labelText: 'Combo Dulce Adultos'),
               ),
               const SizedBox(height: 24),
               DropdownButtonFormField<String>(
                 value: estadoPago,
-                items: ['Pendiente', 'Confirmado']
+                items: [
+                  'Pago de seña',
+                  'Transferencia',
+                  'Efectivo con descuento',
+                  'Tarjeta de crédito',
+                  'Pendiente'
+                ]
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                     .toList(),
                 onChanged: (val) => setState(() => estadoPago = val!),
                 decoration: const InputDecoration(labelText: 'Estado de pago'),
               ),
               const SizedBox(height: 24),
+              TextFormField(
+                controller: importeController,
+                decoration: const InputDecoration(labelText: 'Importe'),
+                validator: (val) => val!.isEmpty ? 'Requerido' : null,
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 24),
+              TextFormField(
+                controller: pagosController,
+                decoration:
+                    const InputDecoration(labelText: 'Descripción de Pagos'),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 12),
               SwitchListTile(
                 title: const Text('¿Incluye Piñata?'),
                 value: pinata == 'Sí',
@@ -539,7 +464,6 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                   });
                 },
               ),
-
               const SizedBox(height: 24),
               TextFormField(
                 controller: solicitudEspecialController,
@@ -548,7 +472,6 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                 maxLines: 3,
               ),
               const SizedBox(height: 12),
-
               Center(
                 child: cargando
                     ? const CircularProgressIndicator()

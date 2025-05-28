@@ -441,31 +441,42 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                           Text(
                               'Fecha: ${fecha.day}/${fecha.month}/${fecha.year} - Hora: $horario',
                               style: tituloStyle),
-                          Text('Cumpleañero: ${reserva['cliente'] ?? ''}',
+                          const SizedBox(height: 4),
+                          Text(
+                              'Cumpleañero: ${reserva['cliente'] ?? 'Sin nombre'}',
                               style: tituloStyle),
-                          Text('Adulto: ${reserva['adultoResponsable'] ?? ''}',
+                          const SizedBox(height: 4),
+                          Text(
+                              'Adulto Responsable: ${reserva['adultoResponsable'] ?? 'Sin adulto responsable'}',
                               style: textoStyle),
                           const SizedBox(height: 4),
-                          Text('Telefono: ${reserva['telefono'] ?? ''}',
+                          Text(
+                              'Telefono: ${reserva['telefono'] ?? 'Sin teléfono'}',
                               style: textoStyle),
                           Text(
-                              'Cantidad Nro Niños: ${reserva['cantidadNinos'] ?? ''}',
+                              'Cantidad Nro Niños: ${reserva['cantidadNinos'] ?? 0} | Adultos: ${reserva['cantidadAdultos'] ?? 0}',
                               style: textoStyle),
                           Text(
-                              'Cantidad Nro Adultos: ${reserva['cantidadAdultos'] ?? ''}',
+                              'Combo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? 'Sin combo'}',
                               style: textoStyle),
                           Text(
-                              'Combo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? ''}',
+                              'Cantidad Lunch Adultos: ${reserva['cantidadLunchAdultos'] ?? 0}',
                               style: textoStyle),
                           Text(
-                              'Combo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? ''}',
+                              'Combo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? 'Sin combo'}',
                               style: textoStyle),
-                          Text('Piñata: ${reserva['pinata'] ?? ''}',
-                              style: textoStyle),
-                          Text('Estado de pago: ${reserva['estadoPago'] ?? ''}',
+                          Text('Piñata: ${reserva['pinata'] ?? 'No'}',
                               style: textoStyle),
                           Text(
-                            'Solicitud Especial: ${reserva['solicitudEspecial'] ?? 'Ninguna'}',
+                              'Estado de pago: ${reserva['estadoPago'] ?? 'Sin estado de pago'}',
+                              style: textoStyle),
+                          Text('Importe: ${reserva['importe'] ?? 0}',
+                              style: textoStyle),
+                          Text(
+                              'Descripcion de pago: ${reserva['pagos'] ?? 'Sin descripción'}',
+                              style: textoStyle),
+                          Text(
+                            'Solicitud Especial: ${(reserva['solicitudEspecial'] == null || reserva['solicitudEspecial'].toString().trim().isEmpty) ? 'Ninguna' : reserva['solicitudEspecial']}',
                             style: textoStyle,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -533,7 +544,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                      'Cumpleañero: ${reserva['cliente'] ?? ''}',
+                      'Cumpleañero/a: ${reserva['cliente'] ?? ''}',
                       style: pw.TextStyle(
                         font: poppinsBold,
                         fontSize: 16,
@@ -574,7 +585,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                           fontFallback: [emojiFont],
                         )),
                     pw.Text(
-                        'Combo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? '-'}',
+                        'Combo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? '-'}  | Cantidad: ${reserva['cantidadLunchAdultos'] ?? '-'}',
                         style: pw.TextStyle(
                           font: poppinsRegular,
                           fontSize: 12,
@@ -593,19 +604,28 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                           fontSize: 12,
                           fontFallback: [emojiFont],
                         )),
-                    pw.Text(
-                        'Solicitud Especial: ${reserva['solicitudEspecial']?.toString().trim().isEmpty == false ? reserva['solicitudEspecial'] : 'Ninguna'}',
-                        style: pw.TextStyle(
-                          font: poppinsRegular,
-                          fontSize: 12,
-                          fontFallback: [emojiFont],
-                        )),
                     pw.Text('Estado de pago: ${reserva['estadoPago'] ?? ''}',
                         style: pw.TextStyle(
                             font: poppinsBold,
                             fontSize: 12,
                             fontFallback: [emojiFont],
                             color: PdfColors.green800)),
+                    pw.Text('Importe: ${reserva['importe'] ?? ''}',
+                        style: pw.TextStyle(
+                            font: poppinsBold,
+                            fontSize: 12,
+                            fontFallback: [emojiFont])),
+                    pw.Text('Descripcion de pago: ${reserva['pagos'] ?? ''}',
+                        style: pw.TextStyle(
+                            font: poppinsBold,
+                            fontSize: 12,
+                            fontFallback: [emojiFont])),
+                    pw.Text(
+                        'Solicitud Especial: ${(reserva['solicitudEspecial'] == null || reserva['solicitudEspecial'].toString().trim().isEmpty) ? 'Ninguna' : reserva['solicitudEspecial']}',
+                        style: pw.TextStyle(
+                          font: poppinsRegular,
+                          fontSize: 12,
+                        )),
                   ],
                 ),
               );

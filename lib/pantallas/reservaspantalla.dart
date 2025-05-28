@@ -13,7 +13,7 @@ class ReservasPantalla extends StatelessWidget {
         title: const Text(
           'Todas las Reservas',
           style: TextStyle(
-            color: Color(0xFFFDE047), // Amarillo suave
+            color: Color(0xFFA0D8EF), // Amarillo suave
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -78,8 +78,7 @@ class ReservasPantalla extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
-                    '• Adulto Responsable: $adultoResponsable\n• Fecha: ${fecha.day}/${fecha.month}/${fecha.year}\n• Telefono: $telefono\n• Cantidad de niños: ${reserva['cantidadNinos'] ?? '-'}\n• Cantidad de adultos: ${reserva['cantidadAdultos'] ?? '-'}\n• Combo Lunch Adultos: $comboLunchAdultos\n• Combo Dulce Adultos: $comboDulceAdultos\n• Piñata: $pinata\n• Pago: $estadoPago',
-                  ),
+                      '• Adulto Responsable: $adultoResponsable\n• Fecha: ${fecha.day}/${fecha.month}/${fecha.year}\n• Telefono: $telefono\n• Cantidad de niños: ${reserva['cantidadNinos'] ?? '-'}\n• Cantidad de adultos: ${reserva['cantidadAdultos'] ?? '-'}\n• Combo Lunch Adultos: $comboLunchAdultos\n• Cantidad de Lunch Adultos: ${reserva['cantidadLunchAdultos'] ?? '-'} \n• Combo Dulce Adultos: $comboDulceAdultos\n• Piñata: $pinata\n• Estado de pago: $estadoPago\n• Importe: ${reserva['importe'] ?? '-'} \n• Descripcion de pago: ${reserva['pagos'] ?? '-'}\n• Solicitud Especial: ${reserva['solicitudEspecial'] ?? '-'} '),
                   trailing: PopupMenuButton<String>(
                     onSelected: (value) {
                       if (value == 'editar') {

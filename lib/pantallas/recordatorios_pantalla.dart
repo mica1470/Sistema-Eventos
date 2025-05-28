@@ -140,10 +140,16 @@ class _RecordatoriosPantallaState extends State<RecordatoriosPantalla> {
               final cantidadAdultos = data['cantidadAdultos'] ?? 'Sin combo';
               final comboDulceAdultos =
                   data['comboDulceAdultos'] ?? 'Sin combo';
+              final cantidadLunchAdultos =
+                  data['cantidadLunchAdultos'] ?? 'Sin combo';
               final comboLunchAdultos =
                   data['comboLunchAdultos'] ?? 'Sin combo';
               final pinata = data['pinata'] ?? 'Sin piñata';
               final estado = data['estadoPago'] ?? 'Sin estado';
+              final importe = data['importe'] ?? 'Sin importe';
+              final pagos = data['pagos'] ?? 'Sin detalles de pago';
+              final solicitudEspecial =
+                  data['solicitudEspecial'] ?? 'Sin solicitud especial';
 
               return Card(
                 margin: const EdgeInsets.all(10),
@@ -157,9 +163,12 @@ class _RecordatoriosPantallaState extends State<RecordatoriosPantalla> {
                       'Cantidad de Niños: $cantidadNinos\n'
                       'Cantidad de Adultos: $cantidadAdultos\n'
                       'Combo Dulce Adultos: $comboDulceAdultos\n'
-                      'Combo Lunch Adultos: $comboLunchAdultos\n'
+                      'Combo Lunch Adultos: $comboLunchAdultos\n | Cantidad: $cantidadLunchAdultos\n'
                       'Piñata: $pinata\n'
-                      'Estado de Pago: $estado\n'),
+                      'Estado de Pago: $estado\n'
+                      'Importe: $importe\n'
+                      'Detalle de pago: $pagos\n'
+                      'Solicitud Especial: $solicitudEspecial'),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete, color: Colors.red),
                     tooltip: 'Eliminar recordatorio',
