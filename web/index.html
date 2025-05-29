@@ -6,26 +6,48 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Futuros heroes pelotero">
   <meta name="google-signin-client_id" content="358484879694-6791jev9ebk920k9h04sn3bd8i4dlbch.apps.googleusercontent.com">
-
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="FuturosHeroes_web">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
   <link rel="icon" href="assets/imagen.jpg" type="image/jpg">
-
+  
   <title>Futuros Heroes</title>
   <link rel="manifest" href="manifest.json">
-</head>
-<body>
+  
+  <!-- ✅ Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+      const firebaseConfig = {
+        apiKey: "AIzaSyB-KIrw0A2sday9wgIUtbJWDrFOsqei_YE",
+        authDomain: "futuros-heroes.firebaseapp.com",
+        projectId: "futuros-heroes",
+        storageBucket: "futuros-heroes.firebasestorage.app",
+        messagingSenderId: "62549888538",
+        appId: "1:62549888538:web:d443de2de3f7e5b2ce4ba3",
+        measurementId: "G-GL8W5HNR6P"
+      };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+  </script>
   
+  </head>
   
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="flutter_bootstrap.js" async></script>
-  <script src="https://apis.google.com/js/api.js"></script>
+  <body>
+  
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+  
+    <!-- Flutter app -->
+    <script src="flutter_bootstrap.js" async></script>
 
 </body>
 </html>

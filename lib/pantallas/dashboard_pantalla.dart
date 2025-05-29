@@ -1,5 +1,5 @@
 // ignore_for_file: unnecessary_to_list_in_spreads, avoid_web_libraries_in_flutter
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,6 +23,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
   List<Map<String, dynamic>> reservasVisibles = [];
   // Contador de reservas próximas a vencer en 3 días
   int reservasProximasAVencer = 0;
+  final user = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +48,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
       backgroundColor: const Color(0xFFF3F4F6),
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(151, 253, 223, 71),
-        elevation: 2,
+        elevation: 3,
         title: Row(
           children: [
             Image.asset(
@@ -56,10 +57,10 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
             ),
             const SizedBox(width: 12),
             Text(
-              'Futuros Héroes',
+              '¡Hola ${user?.displayName ?? user?.email ?? 'Usuario'}!',
               style: GoogleFonts.poppins(
-                color: const Color.fromARGB(221, 107, 85, 53),
-                fontWeight: FontWeight.bold,
+                color: Colors.grey[800],
+                fontWeight: FontWeight.w500,
                 fontSize: 22,
               ),
             ),
@@ -135,6 +136,14 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                   ],
                 );
               }
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout_rounded, color: Colors.black87),
+            tooltip: 'Cerrar sesión',
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.pushReplacementNamed(context, '/login');
             },
           ),
           const SizedBox(width: 8),
@@ -388,8 +397,6 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                 maxCrossAxisExtent: 440,
                 mainAxisSpacing: 14,
                 crossAxisSpacing: 14,
-                // Ojo con childAspectRatio fijo, mejor quitar o poner uno dinámico
-                // childAspectRatio: 1.6,
               ),
               itemBuilder: (context, index) {
                 final data = reservasFiltradas[index].data();
@@ -430,58 +437,59 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(22),
-                      child: Column(
-                        mainAxisSize:
-                            MainAxisSize.min, // 👈 Esto evita overflow
-                        crossAxisAlignment: CrossAxisAlignment
-                            .stretch, // 👈 Que el contenido use todo el ancho
-
-                        children: [
-                          Text(
-                              'Fecha: ${fecha.day}/${fecha.month}/${fecha.year} - Hora: $horario',
-                              style: tituloStyle),
-                          const SizedBox(height: 4),
-                          Text(
-                              'Cumpleañero: ${reserva['cliente'] ?? 'Sin nombre'}',
-                              style: tituloStyle),
-                          const SizedBox(height: 4),
-                          Text(
-                              'Adulto Responsable: ${reserva['adultoResponsable'] ?? 'Sin adulto responsable'}',
-                              style: textoStyle),
-                          const SizedBox(height: 4),
-                          Text(
-                              'Telefono: ${reserva['telefono'] ?? 'Sin teléfono'}',
-                              style: textoStyle),
-                          Text(
-                              'Cantidad Nro Niños: ${reserva['cantidadNinos'] ?? 0} | Adultos: ${reserva['cantidadAdultos'] ?? 0}',
-                              style: textoStyle),
-                          Text(
-                              'Combo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? 'Sin combo'}',
-                              style: textoStyle),
-                          Text(
-                              'Cantidad Lunch Adultos: ${reserva['cantidadLunchAdultos'] ?? 0}',
-                              style: textoStyle),
-                          Text(
-                              'Combo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? 'Sin combo'}',
-                              style: textoStyle),
-                          Text('Piñata: ${reserva['pinata'] ?? 'No'}',
-                              style: textoStyle),
-                          Text(
-                              'Estado de pago: ${reserva['estadoPago'] ?? 'Sin estado de pago'}',
-                              style: textoStyle),
-                          Text('Importe: ${reserva['importe'] ?? 0}',
-                              style: textoStyle),
-                          Text(
-                              'Descripcion de pago: ${reserva['pagos'] ?? 'Sin descripción'}',
-                              style: textoStyle),
-                          Text(
-                            'Solicitud Especial: ${(reserva['solicitudEspecial'] == null || reserva['solicitudEspecial'].toString().trim().isEmpty) ? 'Ninguna' : reserva['solicitudEspecial']}',
-                            style: textoStyle,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                      padding: const EdgeInsets.all(8),
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(14),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                  'Fecha: ${fecha.day}/${fecha.month}/${fecha.year} - Hora: $horario',
+                                  style: tituloStyle),
+                              const SizedBox(height: 4),
+                              Text(
+                                  'Cumpleañero: ${reserva['cliente'] ?? 'Sin nombre'}',
+                                  style: textoStyle),
+                              const SizedBox(height: 4),
+                              Text(
+                                  'Adulto Responsable: ${reserva['adultoResponsable'] ?? 'Sin adulto responsable'}',
+                                  style: textoStyle),
+                              Text(
+                                  'Telefono: ${reserva['telefono'] ?? 'Sin teléfono'}',
+                                  style: textoStyle),
+                              Text(
+                                  'Cantidad Nro Niños: ${reserva['cantidadNinos'] ?? 0} | Adultos: ${reserva['cantidadAdultos'] ?? 0}',
+                                  style: textoStyle),
+                              Text(
+                                  'Combo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? 'Sin combo'}',
+                                  style: textoStyle),
+                              Text(
+                                  'Cantidad Lunch Adultos: ${reserva['cantidadLunchAdultos'] ?? 0}',
+                                  style: textoStyle),
+                              Text(
+                                  'Combo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? 'Sin combo'}',
+                                  style: textoStyle),
+                              Text('Piñata: ${reserva['pinata'] ?? 'No'}',
+                                  style: textoStyle),
+                              Text(
+                                  'Estado de pago: ${reserva['estadoPago'] ?? 'Sin estado de pago'}',
+                                  style: textoStyle),
+                              Text('Importe: ${reserva['importe'] ?? 0}',
+                                  style: textoStyle),
+                              Text(
+                                  'Descripcion de pago: ${reserva['pagos'] ?? 'Sin descripción'}',
+                                  style: textoStyle),
+                              Text(
+                                'Solicitud Especial: ${(reserva['solicitudEspecial'] == null || reserva['solicitudEspecial'].toString().trim().isEmpty) ? 'Ninguna' : reserva['solicitudEspecial']}',
+                                style: textoStyle,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -585,7 +593,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                           fontFallback: [emojiFont],
                         )),
                     pw.Text(
-                        'Combo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? '-'}  | Cantidad: ${reserva['cantidadLunchAdultos'] ?? '-'}',
+                        'Combo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? '-'}  | Cantidad: ${reserva['cantidadLunchAdultos'] ?? '0'}',
                         style: pw.TextStyle(
                           font: poppinsRegular,
                           fontSize: 12,
