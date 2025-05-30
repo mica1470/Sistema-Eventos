@@ -1,16 +1,33 @@
-# eventos_infantiles_web
+**Futuros Héroes**
 
-A new Flutter project.
+## Descripción del Proyecto
 
-## Getting Started
+**Futuros Héroes** es un sistema de gestión de eventos infantiles desarrollado en Flutter. Permite administrar reservas de clientes, gestionar el stock de insumos y visualizar la información de manera intuitiva.
 
-This project is a starting point for a Flutter application.
+## Funcionalidades Principales
 
-A few resources to get you started if this is your first Flutter project:
+- Gestión de reservas de eventos infantiles.
+- Visualización de reservas en un calendario interactivo.
+- Creación y administración de stock de productos e insumos.
+- Descarga de reservas en formato PDF con diferentes representaciones y filtros.
+- Filtros avanzados para búsquedas y reportes personalizados.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Tecnologías Utilizadas
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Flutter (Frontend)
+- Herramientas de generación de PDF
+- Widgets de calendario y formularios personalizados
+
+## Instalación y Ejecución
+
+1. Clona este repositorio.
+2. Ejecuta `flutter pub get` para instalar las dependencias.
+3. Usa `flutter run` para iniciar la aplicación.
+
+## Contribuciones
+
+Las contribuciones son bienvenidas. Por favor, abre un issue o pull request para sugerencias o mejoras.
+
+## Licencia
+
+Este proyecto está bajo la licencia MIT.
