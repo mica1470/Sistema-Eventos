@@ -24,9 +24,9 @@
 2. Ejecuta `flutter pub get` para instalar las dependencias.
 3. Usa `flutter run` para iniciar la aplicación.
 
-## Contribuciones
+## Autenticación
 
-Las contribuciones son bienvenidas. Por favor, abre un issue o pull request para sugerencias o mejoras.
+Puedes iniciar sesión en la aplicación utilizando la autenticación de Google Sign-In para mayor comodidad y seguridad.
 
 ## Licencia
 
