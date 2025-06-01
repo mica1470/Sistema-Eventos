@@ -7,22 +7,25 @@ class ReservasPantalla extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F6), // Fondo general
+      key: const Key('pantalla_reservas'),
+      backgroundColor: const Color(0xFFF3F4F6),
       appBar: AppBar(
+        key: const Key('barra_app_reservas'),
         backgroundColor: Colors.white,
         title: const Text(
           'Todas las Reservas',
           style: TextStyle(
-            color: Color(0xFFA0D8EF), // Amarillo suave
+            color: Color(0xFFA0D8EF),
             fontWeight: FontWeight.bold,
           ),
         ),
         iconTheme: const IconThemeData(color: Colors.black),
         actions: [
           IconButton(
+            key: const Key('boton_nueva_reserva'),
             icon: const Icon(Icons.add),
             tooltip: 'Nueva Reserva',
-            color: const Color(0xFFFF6B81), // Rosa coral
+            color: const Color(0xFFFF6B81),
             onPressed: () {
               Navigator.pushNamed(context, '/nueva-reserva');
             },
@@ -36,20 +39,30 @@ class ReservasPantalla extends StatelessWidget {
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(child: Text('Error al cargar reservas'));
+            return const Center(
+              key: Key('error_reservas'),
+              child: Text('Error al cargar reservas'),
+            );
           }
 
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              key: Key('cargando_reservas'),
+              child: CircularProgressIndicator(),
+            );
           }
 
           final reservas = snapshot.data!.docs;
 
           if (reservas.isEmpty) {
-            return const Center(child: Text('No hay reservas registradas'));
+            return const Center(
+              key: Key('sin_reservas'),
+              child: Text('No hay reservas registradas'),
+            );
           }
 
           return ListView.separated(
+            key: const Key('lista_reservas'),
             itemCount: reservas.length,
             separatorBuilder: (_, __) => const Divider(height: 1),
             itemBuilder: (context, index) {
@@ -69,17 +82,35 @@ class ReservasPantalla extends StatelessWidget {
               final fecha = DateTime.tryParse(fechaStr) ?? DateTime.now();
 
               return Card(
-                color: Colors.white, // Contenedor blanco
+                key: Key('tarjeta_reserva_$index'),
+                color: Colors.white,
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: ListTile(
+                  key: Key('list_tile_reserva_$index'),
                   leading: const Icon(Icons.event, color: Colors.black),
                   title: Text(
                     cliente,
+                    key: Key('nombre_cliente_$index'),
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
-                      '• Adulto Responsable: $adultoResponsable\n• Fecha: ${fecha.day}/${fecha.month}/${fecha.year}\n• Telefono: $telefono\n• Cantidad de niños: ${reserva['cantidadNinos'] ?? '-'}\n• Cantidad de adultos: ${reserva['cantidadAdultos'] ?? '-'}\n• Combo Lunch Adultos: $comboLunchAdultos\n• Cantidad de Lunch Adultos: ${reserva['cantidadLunchAdultos'] ?? '-'} \n• Combo Dulce Adultos: $comboDulceAdultos\n• Piñata: $pinata\n• Estado de pago: $estadoPago\n• Importe: ${reserva['importe'] ?? '-'} \n• Descripcion de pago: ${reserva['pagos'] ?? '-'}\n• Solicitud Especial: ${reserva['solicitudEspecial'] ?? '-'} '),
+                    '• Adulto Responsable: $adultoResponsable\n'
+                    '• Fecha: ${fecha.day}/${fecha.month}/${fecha.year}\n'
+                    '• Telefono: $telefono\n'
+                    '• Cantidad de niños: ${reserva['cantidadNinos'] ?? '-'}\n'
+                    '• Cantidad de adultos: ${reserva['cantidadAdultos'] ?? '-'}\n'
+                    '• Combo Lunch Adultos: $comboLunchAdultos\n'
+                    '• Cantidad de Lunch Adultos: ${reserva['cantidadLunchAdultos'] ?? '-'}\n'
+                    '• Combo Dulce Adultos: $comboDulceAdultos\n'
+                    '• Piñata: $pinata\n'
+                    '• Estado de pago: $estadoPago\n'
+                    '• Importe: ${reserva['importe'] ?? '-'}\n'
+                    '• Descripción de pago: ${reserva['pagos'] ?? '-'}\n'
+                    '• Solicitud Especial: ${reserva['solicitudEspecial'] ?? '-'}',
+                    key: Key('detalle_reserva_$index'),
+                  ),
                   trailing: PopupMenuButton<String>(
+                    key: Key('menu_reserva_$index'),
                     onSelected: (value) {
                       if (value == 'editar') {
                         Navigator.pushNamed(
@@ -118,12 +149,14 @@ class ReservasPantalla extends StatelessWidget {
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (contextDialog) => AlertDialog(
+        key: Key('dialogo_confirmar_eliminacion_$id'),
         title: const Text('Confirmar eliminación'),
         content: const Text(
           '¿Estás seguro de que querés eliminar esta reserva?',
         ),
         actions: [
           TextButton(
+            key: Key('boton_cancelar_eliminacion_$id'),
             onPressed: () => Navigator.pop(contextDialog, false),
             style: TextButton.styleFrom(
               foregroundColor: const Color(0xFFA0D8EF), // Azul pastel
@@ -131,6 +164,7 @@ class ReservasPantalla extends StatelessWidget {
             child: const Text('Cancelar'),
           ),
           TextButton(
+            key: Key('boton_confirmar_eliminacion_$id'),
             onPressed: () => Navigator.pop(contextDialog, true),
             style: TextButton.styleFrom(
               foregroundColor: const Color(0xFFFF6B81), // Rosa coral

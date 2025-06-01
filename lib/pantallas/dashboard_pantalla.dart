@@ -95,6 +95,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                 return Stack(
                   children: [
                     IconButton(
+                      key: const Key('btn_notificaciones'),
                       icon: const Icon(Icons.notifications_active_rounded,
                           color: Colors.black87),
                       onPressed: () {
@@ -127,6 +128,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                 return Stack(
                   children: [
                     IconButton(
+                      key: const Key('btn_notificaciones'),
                       icon: const Icon(Icons.notifications_active_rounded,
                           color: Colors.black87),
                       onPressed: () {
@@ -139,6 +141,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
             },
           ),
           IconButton(
+            key: const Key('btn_logout'),
             icon: const Icon(Icons.logout_rounded, color: Colors.black87),
             tooltip: 'Cerrar sesión',
             onPressed: () async {
@@ -146,6 +149,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               Navigator.pushReplacementNamed(context, '/login');
             },
           ),
+
           const SizedBox(width: 8),
         ],
       ),
@@ -241,14 +245,17 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               Row(
                 children: [
                   DropdownButton<String>(
+                    key: const Key('dropdown_filtro_reservas'),
                     value: filtroReservas,
                     style: GoogleFonts.poppins(color: Colors.black87),
                     items: const [
                       DropdownMenuItem(
+                        key: Key('filtro_recientes'),
                         value: 'Recientes',
                         child: Text('Recientes'),
                       ),
                       DropdownMenuItem(
+                        key: Key('filtro_proximas'),
                         value: 'Próximas a vencer',
                         child: Text('Próximas a vencer'),
                       ),
@@ -262,6 +269,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                     },
                   ),
                   IconButton(
+                    key: const Key('btn_descargar_pdf'),
                     icon: const Icon(Icons.download),
                     tooltip: 'Descargar reservas visibles en PDF',
                     onPressed: () => _generarPdf(reservasVisibles),
@@ -273,6 +281,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
           const SizedBox(height: 15),
           _buildReservasGrid(cardTituloStyle, cardTextoStyle),
           TextButton(
+            key: const Key('btn_toggle_reservas'),
             onPressed: () {
               setState(() {
                 mostrarTodasLasReservas = !mostrarTodasLasReservas;
@@ -287,6 +296,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
           const SizedBox(height: 12),
           _buildStockReciente(cardTituloStyle, cardTextoStyle),
           TextButton(
+            key: const Key('btn_toggle_stock'),
             onPressed: () {
               setState(() {
                 mostrarTodoElStock = !mostrarTodoElStock;
@@ -299,6 +309,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        key: const Key('fab_nueva_reserva'),
         onPressed: () => Navigator.pushNamed(context, '/nueva-reserva'),
         icon: const Icon(Icons.add),
         label: const Text('Nueva Reserva'),
@@ -321,6 +332,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
         elevation: 3,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: ListTile(
+          key: Key('menu_$text'.toLowerCase().replaceAll(' ', '_')),
           leading: Icon(icon, color: Colors.pinkAccent),
           title: Text(text, style: GoogleFonts.poppins(fontSize: 16)),
           trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
@@ -381,7 +393,6 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               return true;
             }).toList();
 
-            // Actualizo la lista para el PDF:
             reservasVisibles = reservasFiltradas.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
               final Map<String, dynamic> copia = Map.from(data);
@@ -390,6 +401,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
             }).toList();
 
             return GridView.builder(
+              key: const Key('ReservasGrid'),
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: reservasFiltradas.length,
@@ -402,6 +414,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                 final data = reservasFiltradas[index].data();
                 if (data is! Map<String, dynamic>) {
                   return Card(
+                    key: Key('ReservaInvalidaCard_$index'),
                     color: Colors.red.shade100,
                     child: Center(
                       child:
@@ -409,15 +422,16 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                     ),
                   );
                 }
+
                 final reserva = data;
                 final id = reservasFiltradas[index].id;
                 final dynamic fechaRaw = reserva['fecha'];
-                DateTime fecha;
                 final fechaReserva = reserva['fecha'] is Timestamp
                     ? (reserva['fecha'] as Timestamp).toDate()
                     : DateTime.tryParse(reserva['fecha']) ?? DateTime.now();
                 final horario = DateFormat.Hm().format(fechaReserva);
 
+                DateTime fecha;
                 if (fechaRaw is Timestamp) {
                   fecha = fechaRaw.toDate();
                 } else if (fechaRaw is String) {
@@ -427,10 +441,12 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                 }
 
                 return GestureDetector(
+                  key: Key('ReservaCard_$index'),
                   onTap: () {
                     _mostrarOpcionesReserva(context, id, reserva);
                   },
                   child: Card(
+                    key: Key('ReservaCardContent_$index'),
                     color: const Color(0xFFA0D8EF),
                     elevation: 4,
                     shape: RoundedRectangleBorder(
@@ -446,46 +462,72 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Text(
-                                  'Fecha: ${fecha.day}/${fecha.month}/${fecha.year} - Hora: $horario',
-                                  style: tituloStyle),
+                                'Fecha: ${fecha.day}/${fecha.month}/${fecha.year} - Hora: $horario',
+                                style: tituloStyle,
+                                key: Key('ReservaFecha_$index'),
+                              ),
                               const SizedBox(height: 4),
                               Text(
-                                  'Cumpleañero: ${reserva['cliente'] ?? 'Sin nombre'}',
-                                  style: textoStyle),
-                              const SizedBox(height: 4),
+                                'Cumpleañero: ${reserva['cliente'] ?? 'Sin nombre'}',
+                                style: textoStyle,
+                                key: Key('ReservaCliente_$index'),
+                              ),
                               Text(
-                                  'Adulto Responsable: ${reserva['adultoResponsable'] ?? 'Sin adulto responsable'}',
-                                  style: textoStyle),
+                                'Adulto Responsable: ${reserva['adultoResponsable'] ?? 'Sin adulto responsable'}',
+                                style: textoStyle,
+                                key: Key('ReservaAdulto_$index'),
+                              ),
                               Text(
-                                  'Telefono: ${reserva['telefono'] ?? 'Sin teléfono'}',
-                                  style: textoStyle),
+                                'Telefono: ${reserva['telefono'] ?? 'Sin teléfono'}',
+                                style: textoStyle,
+                                key: Key('ReservaTelefono_$index'),
+                              ),
                               Text(
-                                  'Cantidad Nro Niños: ${reserva['cantidadNinos'] ?? 0} | Adultos: ${reserva['cantidadAdultos'] ?? 0}',
-                                  style: textoStyle),
+                                'Cantidad Nro Niños: ${reserva['cantidadNinos'] ?? 0} | Adultos: ${reserva['cantidadAdultos'] ?? 0}',
+                                style: textoStyle,
+                                key: Key('ReservaCantidad_$index'),
+                              ),
                               Text(
-                                  'Combo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? 'Sin combo'}',
-                                  style: textoStyle),
+                                'Combo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? 'Sin combo'}',
+                                style: textoStyle,
+                                key: Key('ReservaComboLunch_$index'),
+                              ),
                               Text(
-                                  'Cantidad Lunch Adultos: ${reserva['cantidadLunchAdultos'] ?? 0}',
-                                  style: textoStyle),
+                                'Cantidad Lunch Adultos: ${reserva['cantidadLunchAdultos'] ?? 0}',
+                                style: textoStyle,
+                                key: Key('ReservaCantidadLunch_$index'),
+                              ),
                               Text(
-                                  'Combo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? 'Sin combo'}',
-                                  style: textoStyle),
-                              Text('Piñata: ${reserva['pinata'] ?? 'No'}',
-                                  style: textoStyle),
+                                'Combo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? 'Sin combo'}',
+                                style: textoStyle,
+                                key: Key('ReservaComboDulce_$index'),
+                              ),
                               Text(
-                                  'Estado de pago: ${reserva['estadoPago'] ?? 'Sin estado de pago'}',
-                                  style: textoStyle),
-                              Text('Importe: ${reserva['importe'] ?? 0}',
-                                  style: textoStyle),
+                                'Piñata: ${reserva['pinata'] ?? 'No'}',
+                                style: textoStyle,
+                                key: Key('ReservaPinata_$index'),
+                              ),
                               Text(
-                                  'Descripcion de pago: ${reserva['pagos'] ?? 'Sin descripción'}',
-                                  style: textoStyle),
+                                'Estado de pago: ${reserva['estadoPago'] ?? 'Sin estado de pago'}',
+                                style: textoStyle,
+                                key: Key('ReservaEstadoPago_$index'),
+                              ),
+                              Text(
+                                'Importe: ${reserva['importe'] ?? 0}',
+                                style: textoStyle,
+                                key: Key('ReservaImporte_$index'),
+                              ),
+                              Text(
+                                'Descripcion de pago: ${reserva['pagos'] ?? 'Sin descripción'}',
+                                style: textoStyle,
+                                key: Key('ReservaPagos_$index'),
+                              ),
                               Text(
                                 'Solicitud Especial: ${(reserva['solicitudEspecial'] == null || reserva['solicitudEspecial'].toString().trim().isEmpty) ? 'Ninguna' : reserva['solicitudEspecial']}',
                                 style: textoStyle,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
+                                key: Key('ReservaSolicitud_$index'),
                               ),
                             ],
                           ),
@@ -657,9 +699,11 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
       context: contextPadre,
       builder: (contextModal) {
         return Column(
+          key: const Key('modal_opciones_reserva'),
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
+              key: Key('btn_editar_reserva_$id'),
               leading: const Icon(Icons.edit),
               title: const Text('Editar reserva'),
               onTap: () {
@@ -675,6 +719,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               },
             ),
             ListTile(
+              key: Key('btn_eliminar_reserva_$id'),
               leading: const Icon(Icons.delete),
               title: const Text('Eliminar reserva'),
               onTap: () async {
@@ -682,15 +727,18 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                 final confirmar = await showDialog<bool>(
                   context: contextPadre,
                   builder: (contextDialog) => AlertDialog(
+                    key: const Key('dialog_confirmacion_eliminacion'),
                     title: const Text('Confirmar eliminación'),
                     content:
                         const Text('¿Seguro que querés eliminar esta reserva?'),
                     actions: [
                       TextButton(
+                        key: const Key('btn_cancelar_eliminacion'),
                         onPressed: () => Navigator.pop(contextDialog, false),
                         child: const Text('Cancelar'),
                       ),
                       TextButton(
+                        key: const Key('btn_confirmar_eliminacion'),
                         onPressed: () => Navigator.pop(contextDialog, true),
                         child: const Text('Eliminar'),
                       ),
@@ -705,10 +753,10 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                       .doc(id)
                       .delete();
                   if (!mounted) return;
-                  // Usa contextPadre para el SnackBar, no el contextModal
-                  // ignore: use_build_context_synchronously
                   ScaffoldMessenger.of(contextPadre).showSnackBar(
-                    const SnackBar(content: Text('Reserva eliminada')),
+                    const SnackBar(
+                        content: Text('Reserva eliminada'),
+                        key: Key('snackbar_reserva_eliminada')),
                   );
                 }
               },
@@ -728,15 +776,20 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
       ),
       builder: (_) {
         return Padding(
+          key: Key('modal_opciones_stock_$id'),
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Opciones para "${item['nombre'] ?? 'Producto'}"',
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(
+                'Opciones para "${item['nombre'] ?? 'Producto'}"',
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                key: Key('titulo_opciones_stock_$id'),
+              ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
+                key: Key('btn_eliminar_stock_$id'),
                 onPressed: () {
                   Navigator.pop(context);
                   _eliminarStock(id);

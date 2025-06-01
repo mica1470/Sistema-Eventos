@@ -52,20 +52,24 @@ class _RegistroPantallaState extends State<RegistroPantalla> {
     return Scaffold(
       backgroundColor: const Color(0xFFF3F4F6), // 🪄 Gris claro
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFDE047), // 🍭 Amarillo suave
+        key: const Key('appBarRegistro'), // <- IDENTIFICADOR PARA TESTING
+        backgroundColor: const Color(0xFFFDE047),
         foregroundColor: Colors.black,
         title: const Text('Registro de usuario'),
       ),
       body: Center(
         child: SingleChildScrollView(
+          key: const Key('scrollRegistro'), // <- IDENTIFICADOR PARA TESTING
           child: Container(
+            key: const Key(
+                'formContainerRegistro'), // <- IDENTIFICADOR PARA TESTING
             constraints: const BoxConstraints(maxWidth: 400),
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.white, // 🎨 Blanco
+              color: Colors.white,
               borderRadius: BorderRadius.circular(24),
               boxShadow: const [
-                BoxShadow(blurRadius: 12, color: Colors.black12),
+                BoxShadow(blurRadius: 12, color: Colors.black12)
               ],
             ),
             child: Form(
@@ -73,6 +77,7 @@ class _RegistroPantallaState extends State<RegistroPantalla> {
               child: Column(
                 children: [
                   TextFormField(
+                    key: const Key('inputCorreoRegistro'), // <- IDENTIFICADOR
                     controller: emailController,
                     decoration: const InputDecoration(
                       labelText: "Correo electrónico",
@@ -83,6 +88,8 @@ class _RegistroPantallaState extends State<RegistroPantalla> {
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
+                    key: const Key(
+                        'inputContrasenaRegistro'), // <- IDENTIFICADOR
                     controller: passwordController,
                     decoration: const InputDecoration(labelText: "Contraseña"),
                     obscureText: true,
@@ -92,15 +99,22 @@ class _RegistroPantallaState extends State<RegistroPantalla> {
                   ),
                   const SizedBox(height: 24),
                   if (errorMensaje != null)
-                    Text(errorMensaje!,
-                        style: const TextStyle(color: Colors.red)),
+                    Text(
+                      errorMensaje!,
+                      key:
+                          const Key('mensajeErrorRegistro'), // <- IDENTIFICADOR
+                      style: const TextStyle(color: Colors.red),
+                    ),
                   if (cargando)
-                    const CircularProgressIndicator()
+                    const CircularProgressIndicator(
+                      key: Key('cargandoRegistro'), // <- IDENTIFICADOR
+                    )
                   else
                     ElevatedButton(
+                      key: const Key(
+                          'botonRegistrarUsuario'), // <- IDENTIFICADOR
                       style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            const Color(0xFFFF6B81), // 🍓 Rosa coral
+                        backgroundColor: const Color(0xFFFF6B81),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 32, vertical: 12),

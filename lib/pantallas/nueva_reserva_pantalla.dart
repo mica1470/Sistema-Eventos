@@ -335,6 +335,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
         child: Form(
           key: formKey,
           child: Column(
+            key: const Key('formulario_reserva'),
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               ElevatedButton.icon(
@@ -351,6 +352,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
               ),
               const SizedBox(height: 24),
               TextFormField(
+                key: const Key('nombre_cumpleanero'),
                 controller: clienteController,
                 decoration:
                     const InputDecoration(labelText: 'Nombre del Cumpleañero'),
@@ -358,6 +360,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
               ),
               const SizedBox(height: 24),
               TextFormField(
+                key: const Key('nombre_adulto_responsable'),
                 controller: adultoResponsableController,
                 decoration: const InputDecoration(
                   labelText: 'Nombre del Adulto Responsable',
@@ -371,11 +374,13 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
               ),
               const SizedBox(height: 24),
               TextFormField(
+                key: const Key('telefono'),
                 controller: telefonoController,
                 decoration: const InputDecoration(labelText: 'Teléfono'),
               ),
               const SizedBox(height: 24),
               TextFormField(
+                key: const Key('cantidad_ninos'),
                 controller: cantidadNinosController,
                 decoration:
                     const InputDecoration(labelText: 'Cantidad de Niños'),
@@ -384,6 +389,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
               ),
               const SizedBox(height: 24),
               TextFormField(
+                key: const Key('cantidad_adultos'),
                 controller: cantidadAdultosController,
                 decoration:
                     const InputDecoration(labelText: 'Cantidad de Adultos'),
@@ -392,6 +398,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
               ),
               const SizedBox(height: 24),
               DropdownButtonFormField<String>(
+                key: const Key('combo_lunch_adultos'),
                 value: comboLunchAdultos,
                 items: ['Combo Clásico', 'Combo Gourmet', 'Trae comida', 'Otro']
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
@@ -406,6 +413,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
               ),
               const SizedBox(height: 24),
               TextFormField(
+                key: const Key('cantidad_lunch_adultos'),
                 controller: cantidadLunchAdultosController,
                 decoration: const InputDecoration(
                     labelText: 'Cantidad de Lunch Adultos'),
@@ -413,6 +421,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
               ),
               const SizedBox(height: 24),
               DropdownButtonFormField<String>(
+                key: const Key('combo_dulce_adultos'),
                 value: comboDulceAdultos,
                 items: ['Si', 'No']
                     .map((e) => DropdownMenuItem(value: e, child: Text(e)))
@@ -427,6 +436,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
               ),
               const SizedBox(height: 24),
               DropdownButtonFormField<String>(
+                key: const Key('estado_pago'),
                 value: estadoPago,
                 items: [
                   'Pago de seña',
@@ -442,6 +452,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
               ),
               const SizedBox(height: 24),
               TextFormField(
+                key: const Key('importe'),
                 controller: importeController,
                 decoration: const InputDecoration(labelText: 'Importe'),
                 validator: (val) => val!.isEmpty ? 'Requerido' : null,
@@ -449,6 +460,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
               ),
               const SizedBox(height: 24),
               TextFormField(
+                key: const Key('pagos'),
                 controller: pagosController,
                 decoration:
                     const InputDecoration(labelText: 'Descripción de Pagos'),
@@ -456,6 +468,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
               ),
               const SizedBox(height: 12),
               SwitchListTile(
+                key: const Key('pinata'),
                 title: const Text('¿Incluye Piñata?'),
                 value: pinata == 'Sí',
                 onChanged: (valor) {
@@ -466,6 +479,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
               ),
               const SizedBox(height: 24),
               TextFormField(
+                key: const Key('solicitud_especial'),
                 controller: solicitudEspecialController,
                 decoration:
                     const InputDecoration(labelText: 'Solicitud Especial'),
@@ -476,6 +490,7 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                 child: cargando
                     ? const CircularProgressIndicator()
                     : ElevatedButton(
+                        key: const Key('guardar_reserva'),
                         onPressed: guardarReserva,
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(

@@ -12,11 +12,15 @@ class StockPantalla extends StatelessWidget {
       backgroundColor: const Color(0xFFF3F4F6), // Gris claro
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text(
-          'Stock',
-          style: TextStyle(
-            color: Color(0xFFFF6B81), // Amarillo suave
-            fontWeight: FontWeight.bold,
+        title: Semantics(
+          label: 'Sección Stock - título',
+          child: const Text(
+            'Stock',
+            key: Key('stockPantalla_appBar_title'),
+            style: TextStyle(
+              color: Color(0xFFFF6B81), // Amarillo suave
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         iconTheme: const IconThemeData(color: Colors.black),
@@ -28,12 +32,16 @@ class StockPantalla extends StatelessWidget {
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child:
+                  CircularProgressIndicator(key: Key('stockPantalla_loading')),
+            );
           }
 
           final docs = snapshot.data!.docs;
 
           return ListView.builder(
+            key: const Key('stockPantalla_listaItems'),
             itemCount: docs.length,
             itemBuilder: (context, index) {
               final doc = docs[index];
@@ -47,9 +55,12 @@ class StockPantalla extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: ListTile(
-                  title: Text(data['nombre'] ?? ''),
+                  key: Key('stockPantalla_item_${doc.id}'),
+                  title: Text(data['nombre'] ?? '',
+                      key: Key('stockPantalla_item_${doc.id}_nombre')),
                   subtitle: Text(
                     'Categoría: ${data['categoria'] ?? ''} - Cantidad: ${data['cantidad'] ?? 0}',
+                    key: Key('stockPantalla_item_${doc.id}_detalle'),
                   ),
                   onTap: () {
                     showDialog(
@@ -58,20 +69,29 @@ class StockPantalla extends StatelessWidget {
                     );
                   },
                   trailing: IconButton(
+                    key: Key('stockPantalla_item_${doc.id}_btnEliminar'),
                     icon: const Icon(Icons.delete),
                     onPressed: () async {
                       final confirm = await showDialog<bool>(
                         context: context,
                         builder: (context) => AlertDialog(
-                          title: const Text('Confirmar eliminación'),
+                          key: const Key('stockPantalla_confirmDialog'),
+                          title: const Text('Confirmar eliminación',
+                              key: Key('stockPantalla_confirmDialog_titulo')),
                           content: const Text(
-                              '¿Desea eliminar este ítem del stock?'),
+                              '¿Desea eliminar este ítem del stock?',
+                              key:
+                                  Key('stockPantalla_confirmDialog_contenido')),
                           actions: [
                             TextButton(
+                              key: const Key(
+                                  'stockPantalla_confirmDialog_btnCancelar'),
                               onPressed: () => Navigator.pop(context, false),
                               child: const Text('Cancelar'),
                             ),
                             TextButton(
+                              key: const Key(
+                                  'stockPantalla_confirmDialog_btnEliminar'),
                               onPressed: () => Navigator.pop(context, true),
                               child: const Text('Eliminar'),
                             ),
@@ -91,6 +111,7 @@ class StockPantalla extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        key: const Key('stockPantalla_btnAgregar'),
         backgroundColor: const Color(0xFFFF6B81), // Rosa coral
         foregroundColor: Colors.white,
         onPressed: () {
@@ -99,7 +120,7 @@ class StockPantalla extends StatelessWidget {
             builder: (context) => const StockDialog(),
           );
         },
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add, key: Key('stockPantalla_btnAgregar_icon')),
       ),
     );
   }
@@ -163,11 +184,13 @@ class _StockDialogState extends State<StockDialog> {
     final stockCollection = FirebaseFirestore.instance.collection('stock');
 
     return AlertDialog(
+      key: const Key('stockDialog_alertDialog'),
       backgroundColor: Colors.white,
       title: Text(
         widget.doc == null ? 'Nuevo ítem' : 'Editar ítem',
+        key: const Key('stockDialog_titulo'),
         style: const TextStyle(
-          color: Color(0xFFA0D8EF), // Amarillo suave
+          color: Color(0xFFA0D8EF), // Azul pastel
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -178,6 +201,7 @@ class _StockDialogState extends State<StockDialog> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextFormField(
+                key: const Key('stockDialog_inputNombre'),
                 controller: nombreController,
                 decoration: const InputDecoration(
                     labelText: 'Nombre del combo/artículo'),
@@ -186,6 +210,7 @@ class _StockDialogState extends State<StockDialog> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
+                key: const Key('stockDialog_dropdownCategoria'),
                 decoration: const InputDecoration(labelText: 'Categoría'),
                 value: categoriaSeleccionada,
                 items: categorias
@@ -205,6 +230,7 @@ class _StockDialogState extends State<StockDialog> {
                 children: [
                   Expanded(
                     child: TextField(
+                      key: const Key('stockDialog_inputNuevaCategoria'),
                       controller: nuevaCategoriaController,
                       decoration: const InputDecoration(
                         hintText: 'Agregar nueva categoría',
@@ -212,6 +238,7 @@ class _StockDialogState extends State<StockDialog> {
                     ),
                   ),
                   IconButton(
+                    key: const Key('stockDialog_btnAgregarCategoria'),
                     icon: const Icon(Icons.add),
                     onPressed: agregarNuevaCategoria,
                   ),
@@ -219,6 +246,7 @@ class _StockDialogState extends State<StockDialog> {
               ),
               const SizedBox(height: 16),
               TextFormField(
+                key: const Key('stockDialog_inputCantidad'),
                 controller: cantidadController,
                 decoration:
                     const InputDecoration(labelText: 'Cantidad disponible'),
@@ -238,6 +266,7 @@ class _StockDialogState extends State<StockDialog> {
       ),
       actions: [
         TextButton(
+          key: const Key('stockDialog_btnCancelar'),
           style: TextButton.styleFrom(
             foregroundColor: const Color(0xFFA0D8EF), // Azul pastel
           ),
@@ -245,6 +274,7 @@ class _StockDialogState extends State<StockDialog> {
           child: const Text('Cancelar'),
         ),
         ElevatedButton(
+          key: const Key('stockDialog_btnGuardar'),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFFF6B81), // Rosa coral
             foregroundColor: Colors.white,

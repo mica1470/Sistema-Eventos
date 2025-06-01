@@ -53,8 +53,6 @@ class _LoginPantallaState extends State<LoginPantalla> {
 
     try {
       GoogleAuthProvider googleProvider = GoogleAuthProvider();
-
-      // Flutter web: usa signInWithPopup para evitar problemas con redirecciones
       await FirebaseAuth.instance.signInWithPopup(googleProvider);
 
       if (!mounted) return;
@@ -77,14 +75,17 @@ class _LoginPantallaState extends State<LoginPantalla> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F6), // 🪄 Gris claro
+      key: const Key('login_scaffold'),
+      backgroundColor: const Color(0xFFF3F4F6),
       body: Center(
         child: SingleChildScrollView(
+          key: const Key('login_scroll_view'),
           child: Container(
+            key: const Key('login_container'),
             constraints: const BoxConstraints(maxWidth: 400),
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: Colors.white, // 🎨 Blanco
+              color: Colors.white,
               borderRadius: BorderRadius.circular(24),
               boxShadow: const [
                 BoxShadow(blurRadius: 12, color: Colors.black12)
@@ -93,6 +94,7 @@ class _LoginPantallaState extends State<LoginPantalla> {
             child: Form(
               key: formKey,
               child: Column(
+                key: const Key('login_form'),
                 children: [
                   Stack(
                     children: [
@@ -109,6 +111,7 @@ class _LoginPantallaState extends State<LoginPantalla> {
                       ),
                       const Text(
                         "Acceso al sistema",
+                        key: Key('titulo_login'),
                         style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.bold,
@@ -119,6 +122,7 @@ class _LoginPantallaState extends State<LoginPantalla> {
                   ),
                   const SizedBox(height: 24),
                   TextFormField(
+                    key: const Key('input_email'),
                     controller: emailController,
                     decoration: const InputDecoration(
                       labelText: "Correo electrónico",
@@ -129,6 +133,7 @@ class _LoginPantallaState extends State<LoginPantalla> {
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
+                    key: const Key('input_password'),
                     controller: passwordController,
                     decoration: const InputDecoration(labelText: "Contraseña"),
                     obscureText: true,
@@ -138,17 +143,20 @@ class _LoginPantallaState extends State<LoginPantalla> {
                   ),
                   const SizedBox(height: 24),
                   if (errorMensaje != null)
-                    Text(errorMensaje!,
-                        style: const TextStyle(color: Colors.red)),
+                    Text(
+                      errorMensaje!,
+                      key: const Key('mensaje_error'),
+                      style: const TextStyle(color: Colors.red),
+                    ),
                   if (cargando)
-                    const CircularProgressIndicator()
+                    const CircularProgressIndicator(key: Key('loading_spinner'))
                   else
                     Column(
                       children: [
                         ElevatedButton(
+                          key: const Key('boton_login'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color(0xFFFDE047), // 🍭 Amarillo suave
+                            backgroundColor: const Color(0xFFFDE047),
                             foregroundColor:
                                 const Color.fromARGB(153, 66, 66, 66),
                             padding: const EdgeInsets.symmetric(
@@ -165,7 +173,9 @@ class _LoginPantallaState extends State<LoginPantalla> {
                         ),
                         const SizedBox(height: 16),
                         OutlinedButton.icon(
+                          key: const Key('boton_google_login'),
                           label: const Text('Iniciar sesión con Google'),
+                          icon: const Icon(Icons.login),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.black87,
                             padding: const EdgeInsets.symmetric(
@@ -180,6 +190,7 @@ class _LoginPantallaState extends State<LoginPantalla> {
                     ),
                   const SizedBox(height: 16),
                   TextButton(
+                    key: const Key('link_registro'),
                     onPressed: () {
                       Navigator.pushNamed(context, '/registro');
                     },
@@ -200,7 +211,7 @@ class _LoginPantallaState extends State<LoginPantalla> {
                           '¿No tienes cuenta? Regístrate',
                           style: TextStyle(
                             fontSize: 17,
-                            color: Color(0xFFA0D8EF), // azul pastel
+                            color: Color(0xFFA0D8EF),
                             fontWeight: FontWeight.w600,
                           ),
                         ),

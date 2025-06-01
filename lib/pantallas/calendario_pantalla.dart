@@ -328,12 +328,14 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: const Key('calendarioPantalla'),
       backgroundColor: const Color(0xFFF3F4F6), // Fondo gris claro
       appBar: AppBar(
         title: const Text('Calendario de Reservas'),
         backgroundColor: const Color(0xFFFDE047), // Amarillo suave
         foregroundColor: Colors.black87,
         leading: IconButton(
+          key: const Key('calendarioPantallaBackButton'),
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
@@ -342,6 +344,7 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
         ),
         actions: [
           IconButton(
+            key: const Key('calendarioPantallaExportPdfButton'),
             icon: const Icon(Icons.picture_as_pdf),
             tooltip: 'Exportar PDF',
             onPressed: _generarPdf,
@@ -352,6 +355,7 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
       body: Column(
         children: [
           TableCalendar(
+            key: const Key('calendarioPantallaTableCalendar'),
             locale: 'es_ES',
             firstDay: DateTime.utc(2020, 1, 1),
             lastDay: DateTime.utc(2030, 12, 31),
@@ -411,9 +415,11 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
           ),
           const SizedBox(height: 12),
           Expanded(
+            key: const Key('calendarioPantallaReservasDelDia'),
             child: _reservasDelDia.isEmpty
                 ? const Center(child: Text('No hay reservas para este día'))
                 : ListView.builder(
+                    key: const Key('calendarioPantallaReservasListView'),
                     itemCount: _reservasDelDia.length,
                     itemBuilder: (context, index) {
                       final reserva = _reservasDelDia[index];
@@ -423,12 +429,14 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
                               DateTime.now();
 
                       return Card(
+                        key: Key('tarjeta_reserva_$index'),
                         margin: const EdgeInsets.symmetric(
                             vertical: 6, horizontal: 16),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                         color: Colors.white,
                         child: ListTile(
+                          key: Key('list_tile_reserva_$index'),
                           title: Text('Cumpleañero: ${reserva['cliente']}',
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold,
