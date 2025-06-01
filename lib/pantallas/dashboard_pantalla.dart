@@ -694,7 +694,6 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
     final bytes = await pdf.save();
     final blob = html.Blob([bytes], 'application/pdf');
     final url = html.Url.createObjectUrlFromBlob(blob);
-    html.window.open(url, '_blank');
     final anchor = html.document.createElement('a') as html.AnchorElement
       ..href = url
       ..style.display = 'none'
