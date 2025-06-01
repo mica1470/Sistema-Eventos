@@ -102,6 +102,7 @@ class ReservasPantalla extends StatelessWidget {
                     '• Combo Lunch Adultos: $comboLunchAdultos\n'
                     '• Cantidad de Lunch Adultos: ${reserva['cantidadLunchAdultos'] ?? '-'}\n'
                     '• Combo Dulce Adultos: $comboDulceAdultos\n'
+                    '• Cantidad de Dulce Adultos: ${reserva['cantidadDulceAdultos'] ?? '-'}\n'
                     '• Piñata: $pinata\n'
                     '• Estado de pago: $estadoPago\n'
                     '• Importe: ${reserva['importe'] ?? '-'}\n'

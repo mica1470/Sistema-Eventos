@@ -503,6 +503,11 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                                 key: Key('ReservaComboDulce_$index'),
                               ),
                               Text(
+                                'Cantidad Dulce Adultos: ${reserva['cantidadDulceAdultos'] ?? 0}',
+                                style: textoStyle,
+                                key: Key('ReservaCantidadDulce_$index'),
+                              ),
+                              Text(
                                 'Piñata: ${reserva['pinata'] ?? 'No'}',
                                 style: textoStyle,
                                 key: Key('ReservaPinata_$index'),
@@ -642,7 +647,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                           fontFallback: [emojiFont],
                         )),
                     pw.Text(
-                        'Combo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? '-'}',
+                        'Combo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? '-'}  | Cantidad: ${reserva['cantidadDulceAdultos'] ?? '0'}',
                         style: pw.TextStyle(
                           font: poppinsRegular,
                           fontSize: 12,

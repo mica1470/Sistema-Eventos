@@ -34,6 +34,8 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
       TextEditingController();
   final TextEditingController comboDulceAdultosController =
       TextEditingController();
+  final TextEditingController cantidadDulceAdultosController =
+      TextEditingController();
   final TextEditingController solicitudEspecialController =
       TextEditingController();
   final TextEditingController pagosController = TextEditingController();
@@ -77,6 +79,8 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
       cantidadLunchAdultosController.text =
           r['cantidadLunchAdultos']?.toString() ?? '';
       comboDulceAdultosController.text = r['comboDulceAdultos'] ?? 'Sin combo';
+      cantidadDulceAdultosController.text =
+          r['cantidadDulceAdultos']?.toString() ?? '';
       solicitudEspecialController.text =
           r['solicitudEspecial'] ?? 'Sin solicitud especial';
       pagosController.text = r['pagos'] ?? 'Sin descripción de pago';
@@ -187,6 +191,8 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
         'cantidadLunchAdultos':
             int.tryParse(cantidadLunchAdultosController.text) ?? 0,
         'comboDulceAdultos': comboDulceAdultos,
+        'cantidadDulceAdultos':
+            int.tryParse(cantidadDulceAdultosController.text) ?? 0,
         'pinata': pinata,
         'solicitudEspecial': solicitudEspecialController.text,
         'pagos': pagosController.text,
@@ -435,6 +441,14 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                     const InputDecoration(labelText: 'Combo Dulce Adultos'),
               ),
               const SizedBox(height: 24),
+              TextFormField(
+                key: const Key('cantidad_dulce_adultos'),
+                controller: cantidadDulceAdultosController,
+                decoration: const InputDecoration(
+                    labelText: 'Cantidad de Dulces Adultos'),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 24),
               DropdownButtonFormField<String>(
                 key: const Key('estado_pago'),
                 value: estadoPago,
@@ -455,7 +469,6 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                 key: const Key('importe'),
                 controller: importeController,
                 decoration: const InputDecoration(labelText: 'Importe'),
-                validator: (val) => val!.isEmpty ? 'Requerido' : null,
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 24),

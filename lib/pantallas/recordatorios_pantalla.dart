@@ -138,12 +138,15 @@ class _RecordatoriosPantallaState extends State<RecordatoriosPantalla> {
               final telefono = data['telefono'] ?? 'Sin teléfono';
               final cantidadNinos = data['cantidadNinos'] ?? 'Sin combo';
               final cantidadAdultos = data['cantidadAdultos'] ?? 'Sin combo';
+              final cantidadDulceAdultos =
+                  data['cantidadDulceAdultos'] ?? 'Sin combo';
               final comboDulceAdultos =
                   data['comboDulceAdultos'] ?? 'Sin combo';
               final cantidadLunchAdultos =
                   data['cantidadLunchAdultos'] ?? 'Sin combo';
               final comboLunchAdultos =
                   data['comboLunchAdultos'] ?? 'Sin combo';
+
               final pinata = data['pinata'] ?? 'Sin piñata';
               final estado = data['estadoPago'] ?? 'Sin estado';
               final importe = data['importe'] ?? 'Sin importe';
@@ -163,6 +166,7 @@ class _RecordatoriosPantallaState extends State<RecordatoriosPantalla> {
                       'Cantidad de Niños: $cantidadNinos\n'
                       'Cantidad de Adultos: $cantidadAdultos\n'
                       'Combo Dulce Adultos: $comboDulceAdultos\n'
+                      'Cantidad: $cantidadDulceAdultos\n'
                       'Combo Lunch Adultos: $comboLunchAdultos\n'
                       'Cantidad: $cantidadLunchAdultos\n'
                       'Piñata: $pinata\n'

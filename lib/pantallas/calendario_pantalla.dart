@@ -262,7 +262,7 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
                         style: pw.TextStyle(font: poppinsRegular, fontSize: 12),
                       ),
                       pw.Text(
-                        'Niños: ${evento['cantidadNinos']}  |  Adultos: ${evento['cantidadAdultos']}',
+                        'Niños: ${evento['cantidadNinos']}?? 0  |  Adultos: ${evento['cantidadAdultos']}?? 0',
                         style: pw.TextStyle(font: poppinsRegular, fontSize: 12),
                       ),
                       pw.Text(
@@ -270,7 +270,7 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
                         style: pw.TextStyle(font: poppinsRegular, fontSize: 12),
                       ),
                       pw.Text(
-                        'Combo Dulce Adultos: ${evento['comboDulceAdultos']}',
+                        'Combo Dulce Adultos: ${evento['comboDulceAdultos']}   |  Cantidad: ${evento['cantidadDulceAdultos']}?? 0 ',
                         style: pw.TextStyle(font: poppinsRegular, fontSize: 12),
                       ),
                       pw.Text(
@@ -285,7 +285,7 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
                           color: PdfColors.green800,
                         ),
                       ),
-                      pw.Text('Importe: ${evento['importe'] ?? '-'}',
+                      pw.Text('Importe: ${evento['importe'] ?? '0'}',
                           style: pw.TextStyle(
                             font: poppinsBold,
                             fontSize: 12,
@@ -442,7 +442,7 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
                                   fontWeight: FontWeight.bold,
                                   color: Color(0xFFFF6B81))),
                           subtitle: Text(
-                              '\nAdulto Responsable: ${reserva['adultoResponsable'] ?? 'Sin nombre'}\nHorario: ${DateFormat.Hm().format(fecha)}\nTelefono: ${reserva['telefono'] ?? ''}\nCantidad de niños: ${reserva['cantidadNinos'] ?? '-'}\nCantidad de adultos: ${reserva['cantidadAdultos'] ?? '-'}\nCombo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? '-'} - Cantidad: ${reserva['cantidadLunchAdultos']} \nCombo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? '-'}\nPiñata: ${reserva['pinata'] ?? '-'}\nEstado de pago:  ${reserva['estadoPago']}\nImporte: ${reserva['importe'] ?? '-'} \nDescripcion de pago: ${reserva['pagos'] ?? '-'}\nSolicitud Especial: ${(reserva['solicitudEspecial'] == null || reserva['solicitudEspecial'].toString().trim().isEmpty) ? 'Ninguna' : reserva['solicitudEspecial']}'),
+                              '\nAdulto Responsable: ${reserva['adultoResponsable'] ?? 'Sin nombre'}\nHorario: ${DateFormat.Hm().format(fecha)}\nTelefono: ${reserva['telefono'] ?? ''}\nCantidad de niños: ${reserva['cantidadNinos'] ?? '-'}\nCantidad de adultos: ${reserva['cantidadAdultos'] ?? '-'}\nCombo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? '-'} - Cantidad: ${reserva['cantidadLunchAdultos']} \nCombo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? '-'} - Cantidad: ${reserva['cantidadDulceAdultos']} \nPiñata: ${reserva['pinata'] ?? '-'}\nEstado de pago:  ${reserva['estadoPago']}\nImporte: ${reserva['importe'] ?? '-'} \nDescripcion de pago: ${reserva['pagos'] ?? '-'}\nSolicitud Especial: ${(reserva['solicitudEspecial'] == null || reserva['solicitudEspecial'].toString().trim().isEmpty) ? 'Ninguna' : reserva['solicitudEspecial']}'),
                           isThreeLine: true,
                           trailing: const Icon(Icons.event_note,
                               color: Color(0xFFA0D8EF)),
