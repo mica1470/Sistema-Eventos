@@ -262,15 +262,15 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
                         style: pw.TextStyle(font: poppinsRegular, fontSize: 12),
                       ),
                       pw.Text(
-                        'Niños: ${evento['cantidadNinos']}?? 0  |  Adultos: ${evento['cantidadAdultos']}?? 0',
+                        'Niños: ${evento['cantidadNinos']}  |  Adultos: ${evento['cantidadAdultos']}',
                         style: pw.TextStyle(font: poppinsRegular, fontSize: 12),
                       ),
                       pw.Text(
-                        'Combo Lunch Adultos: ${evento['comboLunchAdultos']}  |  Cantidad: ${evento['cantidadLunchAdultos']}?? 0 ',
+                        'Combo Lunch Adultos: ${evento['comboLunchAdultos']}  |  Cantidad: ${evento['cantidadLunchAdultos']}',
                         style: pw.TextStyle(font: poppinsRegular, fontSize: 12),
                       ),
                       pw.Text(
-                        'Combo Dulce Adultos: ${evento['comboDulceAdultos']}   |  Cantidad: ${evento['cantidadDulceAdultos']}?? 0 ',
+                        'Combo Dulce Adultos: ${evento['comboDulceAdultos']}   |  Cantidad: ${evento['cantidadDulceAdultos']}',
                         style: pw.TextStyle(font: poppinsRegular, fontSize: 12),
                       ),
                       pw.Text(
@@ -317,7 +317,7 @@ class _CalendarioPantallaState extends State<CalendarioPantalla> {
     final anchor = html.document.createElement('a') as html.AnchorElement
       ..href = url
       ..style.display = 'none'
-      ..download = 'calendario_reservas_${mesActual}_$anioActual.pdf';
+      ..download = 'Calendario_Reservas_${mesActual}_$anioActual.pdf';
 
     html.document.body!.append(anchor);
     anchor.click();
