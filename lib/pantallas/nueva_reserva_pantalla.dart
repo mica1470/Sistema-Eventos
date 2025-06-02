@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eventos_infantiles_web/pantallas/crearEventoReserva.dart';
 import 'package:flutter/material.dart';
 
 class NuevaReservaPantalla extends StatefulWidget {
@@ -502,19 +503,39 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
               Center(
                 child: cargando
                     ? const CircularProgressIndicator()
-                    : ElevatedButton(
-                        key: const Key('guardar_reserva'),
-                        onPressed: guardarReserva,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 40, vertical: 16),
-                        ),
-                        child: const Text(
-                          'Guardar',
-                          style: TextStyle(fontSize: 20),
-                        ),
+                    : Column(
+                        children: [
+                          ElevatedButton(
+                            key: const Key('guardar_reserva'),
+                            onPressed: guardarReserva,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 40, vertical: 16),
+                            ),
+                            child: const Text(
+                              'Guardar',
+                              style: TextStyle(fontSize: 20),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          ElevatedButton(
+                            key: const Key('crear_evento'),
+                            onPressed: () async {
+                              await crearEventoCalendario();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 40, vertical: 16),
+                              backgroundColor: Colors.green,
+                            ),
+                            child: const Text(
+                              'Crear Evento',
+                              style: TextStyle(fontSize: 20),
+                            ),
+                          ),
+                        ],
                       ),
-              )
+              ),
             ],
           ),
         ),

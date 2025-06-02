@@ -46,6 +46,7 @@ dependencies:
   shared_preferences: ^2.2.2
   table_calendar: ^3.0.9
   pdf: ^3.10.1
+  cloud_functions: ^4.7.6
 
 dev_dependencies:
   flutter_test:
