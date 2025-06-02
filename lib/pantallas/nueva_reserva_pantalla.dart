@@ -20,6 +20,7 @@ class NuevaReservaPantalla extends StatefulWidget {
 }
 
 class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
+  String? reservaIdGuardado;
   final formKey = GlobalKey<FormState>();
   final TextEditingController clienteController = TextEditingController();
   final TextEditingController adultoResponsableController =
@@ -63,7 +64,6 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
     },
   ];
 
-  @override
   @override
   void initState() {
     super.initState();
@@ -209,12 +209,22 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
           FirebaseFirestore.instance.collection('reservas');
 
       if (widget.reservaId != null) {
-        // Editar reserva existente
         await reservasCollection.doc(widget.reservaId).update(reservaData);
+        reservaIdGuardado = widget.reservaId;
       } else {
-        // Crear nueva reserva
-        await reservasCollection.add(reservaData);
+        final docRef = await reservasCollection.add(reservaData);
+        reservaIdGuardado = docRef.id;
+
+        // Aquí actualiza el widget para "convertir" la reserva nueva en editable:
+        // pero no puedes cambiar widget.reservaId, así que usa solo la variable interna.
+        setState(() {
+          // No puedes cambiar widget.reservaId porque es final,
+          // pero puedes usar reservaIdGuardado para las siguientes acciones.
+        });
       }
+
+      print('widget.reservaId: ${widget.reservaId}');
+      print('reservaIdGuardado: $reservaIdGuardado');
 
       if (!mounted) return;
 
@@ -507,7 +517,19 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                         children: [
                           ElevatedButton(
                             key: const Key('guardar_reserva'),
-                            onPressed: guardarReserva,
+                            onPressed: () async {
+                              await guardarReserva();
+
+                              if (reservaIdGuardado != null) {
+                                await crearEventoCalendario(reservaIdGuardado!);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text(
+                                          'No se pudo obtener el ID de la reserva')),
+                                );
+                              }
+                            },
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 40, vertical: 16),
@@ -518,21 +540,6 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          ElevatedButton(
-                            key: const Key('crear_evento'),
-                            onPressed: () async {
-                              await crearEventoCalendario();
-                            },
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 40, vertical: 16),
-                              backgroundColor: Colors.green,
-                            ),
-                            child: const Text(
-                              'Crear Evento',
-                              style: TextStyle(fontSize: 20),
-                            ),
-                          ),
                         ],
                       ),
               ),

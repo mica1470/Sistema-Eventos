@@ -1,14 +1,10 @@
 import 'package:cloud_functions/cloud_functions.dart';
 
-Future<void> crearEventoCalendario() async {
+Future<void> crearEventoCalendario(String reservaId) async {
   try {
-    HttpsCallable callable =
+    final callable =
         FirebaseFunctions.instance.httpsCallable('crearEventoCalendario');
-
-    final result = await callable.call(<String, dynamic>{
-      // Si luego querés pasar datos desde Flutter
-    });
-
+    final result = await callable.call({'reservaId': reservaId});
     if (result.data['success'] == true) {
       print("Evento creado con ID: ${result.data['eventId']}");
     } else {

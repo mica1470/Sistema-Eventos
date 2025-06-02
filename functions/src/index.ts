@@ -1,62 +1,78 @@
 // functions/src/index.ts
 import * as functions from "firebase-functions";
-import {google} from "googleapis";
 import * as admin from "firebase-admin";
-import * as path from "path";
-import * as fs from "fs";
+import { google } from "googleapis";
+
 
 admin.initializeApp();
+// Configura el ID del calendario de Google
+const calendarId = "futurosheroes.pelotero@gmail.com"; 
 
-const SCOPES = ["https://www.googleapis.com/auth/calendar"];
-
-const calendarId = "futurosheroes.pelotero@gmail.com"; // <- el correo del calendario
-
-const getAuth = () => {
-  const keyPath = path.join(__dirname, "../credentials/calendar-credentials.json");
-  const keyFile = fs.readFileSync(keyPath, "utf-8");
-  const credentials = JSON.parse(keyFile);
-
-  const auth = new google.auth.JWT(
-    credentials.client_email,
-    undefined,
-    credentials.private_key,
-    SCOPES
+const auth = new google.auth.GoogleAuth({
+    credentials: require("../credentials/calendar-credentials.json"),
+    scopes: ["https://www.googleapis.com/auth/calendar"],
+  });
+exports.crearEventoCalendario = functions.https.onCall(
+    async (request: functions.https.CallableRequest<{ reservaId: string }>) => {
+      const calendar = google.calendar({ version: "v3", auth });
+  
+      const reservaId = request.data.reservaId;
+  
+      if (!reservaId) {
+        return { success: false, error: "Falta el ID de la reserva" };
+      }
+  
+      try {
+        const reservaDoc = await admin.firestore().collection("reservas").doc(reservaId).get();
+  
+        if (!reservaDoc.exists) {
+          console.error("Reserva no encontrada con ID:", reservaId);
+          return { success: false, error: "Reserva no encontrada" };
+        }
+  
+        const reserva = reservaDoc.data();
+  
+        if (!reserva) {
+          console.error("Datos de reserva indefinidos");
+          return { success: false, error: "Datos de reserva inválidos" };
+        }
+  
+        const cliente = reserva.cliente ?? "Sin nombre";
+        const adultoResponsable = reserva.adultoResponsable ?? "Sin responsable";
+        const telefono = reserva.telefono ?? "Sin teléfono";
+        const fechaInicio = reserva.fecha;
+        const horaFin = reserva.horaFin;
+  
+        if (!fechaInicio || !horaFin) {
+          return { success: false, error: "Faltan datos de fecha u hora" };
+        }
+  
+        const fechaFin = `${fechaInicio.split("T")[0]}T${horaFin}:00-03:00`;
+  
+        const evento = {
+          summary: `Reserva: ${cliente}`,
+          description: `Adulto Responsable: ${adultoResponsable}\nTeléfono: ${telefono}`,
+          start: {
+            dateTime: fechaInicio,
+            timeZone: "America/Argentina/Buenos_Aires",
+          },
+          end: {
+            dateTime: fechaFin,
+            timeZone: "America/Argentina/Buenos_Aires",
+          },
+        };
+  
+        const response = await calendar.events.insert({
+          calendarId,
+          requestBody: evento,
+        });
+  
+        return { success: true, eventId: response.data.id };
+      } catch (error: any) {
+        console.error("Error al crear evento:", error);
+        return { success: false, error: error.message ?? "Error desconocido" };
+      }
+    }
   );
-
-  return auth;
-};
-
-exports.crearEventoCalendario = functions.https.onCall(async (data, context) => {
-  const auth = getAuth();
-  const calendar = google.calendar({version: "v3", auth});
-  // Datos manuales para prueba
-  const cliente = "Juan Pérez";
-  const adultoResponsable = "María López";
-  const telefono = "123456789";
-  const fechaInicio = "2025-06-10T10:00:00-03:00";
-  const fechaFin = "2025-06-10T12:00:00-03:00";
-  const evento = {
-    summary: `Reserva: ${cliente}`,
-    description: `Adulto Responsable: ${adultoResponsable}\nTeléfono: ${telefono}`,
-    start: {
-      dateTime: fechaInicio,
-      timeZone: "America/Argentina/Buenos_Aires",
-    },
-    end: {
-      dateTime: fechaFin,
-      timeZone: "America/Argentina/Buenos_Aires",
-    },
-  };
-
-  try {
-    const response = await calendar.events.insert({
-      calendarId,
-      requestBody: evento,
-    });
-
-    return {success: true, eventId: response.data.id};
-  } catch (error: any) {
-    console.error("Error al crear evento:", error);
-    return {success: false, error: error.message};
-  }
-});
+  
+  
