@@ -38,8 +38,6 @@ exports.crearEventoCalendario = functions.https.onCall(
         }
   
         const cliente = reserva.cliente ?? "Sin nombre";
-        const adultoResponsable = reserva.adultoResponsable ?? "Sin responsable";
-        const telefono = reserva.telefono ?? "Sin teléfono";
         const fechaInicio = reserva.fecha;
         const horaFin = reserva.horaFin;
   
@@ -51,7 +49,7 @@ exports.crearEventoCalendario = functions.https.onCall(
   
         const evento = {
           summary: `Reserva: ${cliente}`,
-          description: `Adulto Responsable: ${adultoResponsable}\nTeléfono: ${telefono}`,
+          description: `Adulto Responsable: ${reserva['adultoResponsable'] ?? 'Sin nombre'}\nHorario: ${new Date(fechaInicio).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}\nTelefono: ${reserva['telefono'] ?? ''}\nCantidad de niños: ${reserva['cantidadNinos'] ?? '-'}\nCantidad de adultos: ${reserva['cantidadAdultos'] ?? '-'}\nCombo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? '-'} - Cantidad: ${reserva['cantidadLunchAdultos']} \nCombo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? '-'} - Cantidad: ${reserva['cantidadDulceAdultos']} \nPiñata: ${reserva['pinata'] ?? '-'}\nEstado de pago:  ${reserva['estadoPago']}\nImporte: ${reserva['importe'] ?? '-'} \nDescripcion de pago: ${reserva['pagos'] ?? '-'}\nSolicitud Especial: ${(reserva['solicitudEspecial'] == null || reserva['solicitudEspecial'].toString().trim() === '') ? 'Ninguna' : reserva['solicitudEspecial']}`,
           start: {
             dateTime: fechaInicio,
             timeZone: "America/Argentina/Buenos_Aires",
