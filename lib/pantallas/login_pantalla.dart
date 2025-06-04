@@ -52,8 +52,25 @@ class _LoginPantallaState extends State<LoginPantalla> {
     });
 
     try {
-      GoogleAuthProvider googleProvider = GoogleAuthProvider();
-      await FirebaseAuth.instance.signInWithPopup(googleProvider);
+      final googleProvider = GoogleAuthProvider();
+      final credenciales =
+          await FirebaseAuth.instance.signInWithPopup(googleProvider);
+      final user = credenciales.user;
+
+      // 🔒 Validar si el usuario ya existía
+      final additionalInfo = credenciales.additionalUserInfo;
+      final esNuevoUsuario = additionalInfo?.isNewUser ?? false;
+
+      if (esNuevoUsuario) {
+        // Si es nuevo, lo deslogueamos inmediatamente
+        await FirebaseAuth.instance.currentUser?.delete();
+        await FirebaseAuth.instance.signOut();
+
+        setState(() {
+          errorMensaje = 'El acceso con nuevas cuentas está deshabilitado.';
+        });
+        return;
+      }
 
       if (!mounted) return;
       Navigator.of(context).pushReplacementNamed('/dashboard');
@@ -189,35 +206,35 @@ class _LoginPantallaState extends State<LoginPantalla> {
                       ],
                     ),
                   const SizedBox(height: 16),
-                  TextButton(
-                    key: const Key('link_registro'),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/registro');
-                    },
-                    child: Stack(
-                      children: [
-                        Text(
-                          '¿No tienes cuenta? Regístrate',
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w600,
-                            foreground: Paint()
-                              ..style = PaintingStyle.stroke
-                              ..strokeWidth = 1
-                              ..color = const Color.fromARGB(118, 66, 66, 66),
-                          ),
-                        ),
-                        const Text(
-                          '¿No tienes cuenta? Regístrate',
-                          style: TextStyle(
-                            fontSize: 17,
-                            color: Color(0xFFA0D8EF),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // TextButton(
+                  //   key: const Key('link_registro'),
+                  //   onPressed: () {
+                  //     Navigator.pushNamed(context, '/registro');
+                  //   },
+                  //   child: Stack(
+                  //     children: [
+                  //       Text(
+                  //         '¿No tienes cuenta? Regístrate',
+                  //         style: TextStyle(
+                  //           fontSize: 17,
+                  //           fontWeight: FontWeight.w600,
+                  //           foreground: Paint()
+                  //             ..style = PaintingStyle.stroke
+                  //             ..strokeWidth = 1
+                  //             ..color = const Color.fromARGB(118, 66, 66, 66),
+                  //         ),
+                  //       ),
+                  //       const Text(
+                  //         '¿No tienes cuenta? Regístrate',
+                  //         style: TextStyle(
+                  //           fontSize: 17,
+                  //           color: Color(0xFFA0D8EF),
+                  //           fontWeight: FontWeight.w600,
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
                 ],
               ),
             ),
