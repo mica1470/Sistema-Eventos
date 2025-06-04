@@ -19,11 +19,41 @@ class DashboardPantalla extends StatefulWidget {
 class _DashboardPantallaState extends State<DashboardPantalla> {
   bool mostrarTodasLasReservas = false;
   bool mostrarTodoElStock = false;
-  String filtroReservas = 'Recientes'; // O 'Próximas a vencer'
+  String filtroReservas = 'Más cercanas';
   List<Map<String, dynamic>> reservasVisibles = [];
   // Contador de reservas próximas a vencer en 3 días
   int reservasProximasAVencer = 0;
   final user = FirebaseAuth.instance.currentUser;
+  List<Map<String, dynamic>> reservasFiltradasCompletas = [];
+  Future<List<Map<String, dynamic>>?> seleccionarReservasParaDescargar(
+      BuildContext context) async {
+    return showDialog<List<Map<String, dynamic>>>(
+      context: context,
+      builder: (contextDialog) => AlertDialog(
+        title: const Text('¿Qué reservas desea descargar?'),
+        content: const Text(
+            'Seleccione si desea descargar todas las reservas filtradas o solo las de la semana.'),
+        actions: [
+          TextButton(
+            key: const Key('btn_descargar_semana'),
+            onPressed: () => Navigator.pop(contextDialog, reservasVisibles),
+            child: const Text('Solo esta semana'),
+          ),
+          TextButton(
+            key: const Key('btn_descargar_todas'),
+            onPressed: () =>
+                Navigator.pop(contextDialog, reservasFiltradasCompletas),
+            child: const Text('Todas las reservas'),
+          ),
+          TextButton(
+            key: const Key('btn_cancelar_descarga'),
+            onPressed: () => Navigator.pop(contextDialog, null),
+            child: const Text('Cancelar'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -244,9 +274,14 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                     style: GoogleFonts.poppins(color: Colors.black87),
                     items: const [
                       DropdownMenuItem(
+                        key: Key('filtro_fecha_cercana'),
+                        value: 'Más cercanas',
+                        child: Text('Más cercanas'),
+                      ),
+                      DropdownMenuItem(
                         key: Key('filtro_recientes'),
                         value: 'Recientes',
-                        child: Text('Recientes'),
+                        child: Text('Más lejanas'),
                       ),
                       DropdownMenuItem(
                         key: Key('filtro_proximas'),
@@ -266,7 +301,14 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                     key: const Key('btn_descargar_pdf'),
                     icon: const Icon(Icons.download),
                     tooltip: 'Descargar reservas visibles en PDF',
-                    onPressed: () => _generarPdf(reservasVisibles),
+                    onPressed: () async {
+                      final reservasSeleccionadas =
+                          await seleccionarReservasParaDescargar(context);
+                      if (reservasSeleccionadas != null &&
+                          reservasSeleccionadas.isNotEmpty) {
+                        await _generarPdf(reservasSeleccionadas);
+                      }
+                    },
                   ),
                 ],
               ),
@@ -350,7 +392,6 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
           stream: FirebaseFirestore.instance
               .collection('reservas')
               .orderBy('fecha', descending: true)
-              .limit(mostrarTodasLasReservas ? 100 : 4)
               .snapshots(),
           builder: (context, snapshot) {
             if (snapshot.hasError) return Text('Error: ${snapshot.error}');
@@ -386,8 +427,46 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
 
               return true;
             }).toList();
+            // Ordena por fecha más cercana si el filtro es "Más cercanas"
+            if (filtroReservas == 'Más cercanas') {
+              reservasFiltradas.sort((a, b) {
+                DateTime? fechaA;
+                DateTime? fechaB;
 
-            reservasVisibles = reservasFiltradas.map((doc) {
+                final aData = a.data() as Map<String, dynamic>;
+                final bData = b.data() as Map<String, dynamic>;
+
+                final fechaRawA = aData['fecha'];
+                final fechaRawB = bData['fecha'];
+
+                if (fechaRawA is Timestamp) {
+                  fechaA = fechaRawA.toDate();
+                } else if (fechaRawA is String) {
+                  fechaA = DateTime.tryParse(fechaRawA);
+                }
+
+                if (fechaRawB is Timestamp) {
+                  fechaB = fechaRawB.toDate();
+                } else if (fechaRawB is String) {
+                  fechaB = DateTime.tryParse(fechaRawB);
+                }
+
+                if (fechaA == null || fechaB == null) return 0;
+                return fechaA.compareTo(fechaB); // Menor primero
+              });
+            }
+
+            final reservasLimitadas = mostrarTodasLasReservas
+                ? reservasFiltradas
+                : reservasFiltradas.take(5).toList();
+
+            reservasVisibles = reservasLimitadas.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              final Map<String, dynamic> copia = Map.from(data);
+              copia['id'] = doc.id;
+              return copia;
+            }).toList();
+            reservasFiltradasCompletas = reservasFiltradas.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
               final Map<String, dynamic> copia = Map.from(data);
               copia['id'] = doc.id;
@@ -398,14 +477,14 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               key: const Key('ReservasGrid'),
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: reservasFiltradas.length,
+              itemCount: reservasLimitadas.length,
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 440,
                 mainAxisSpacing: 14,
                 crossAxisSpacing: 14,
               ),
               itemBuilder: (context, index) {
-                final data = reservasFiltradas[index].data();
+                final data = reservasLimitadas[index].data();
                 if (data is! Map<String, dynamic>) {
                   return Card(
                     key: Key('ReservaInvalidaCard_$index'),
@@ -709,6 +788,15 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
           key: const Key('modal_opciones_reserva'),
           mainAxisSize: MainAxisSize.min,
           children: [
+            ListTile(
+              key: Key('btn_descargarpdf_$id'),
+              leading: const Icon(Icons.download),
+              title: const Text('Descargar PDF'),
+              onTap: () async {
+                Navigator.pop(contextModal);
+                await _generarPdf([reserva]);
+              },
+            ),
             ListTile(
               key: Key('btn_editar_reserva_$id'),
               leading: const Icon(Icons.edit),

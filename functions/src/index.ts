@@ -1,11 +1,8 @@
 // functions/src/index.ts
 import * as functions from "firebase-functions";
-import * as firestoreV1 from "firebase-functions/v1/firestore";
-import { EventContext } from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 import { google } from "googleapis";
-import { JWT } from "google-auth-library";
-
+// Inicializa Firebase Admin SDK
 
 admin.initializeApp();
 // Configura el ID del calendario de Google
@@ -96,31 +93,4 @@ const auth = new google.auth.GoogleAuth({
       }
     }
   );
-  
-exports.eliminarEventoCalendario = firestoreV1
-  .document("reservas/{reservaId}")
-  .onDelete(
-    async (snap: FirebaseFirestore.DocumentSnapshot, context: EventContext) => {
-      try {
-        const deletedData = snap.data();
-        const eventId = deletedData?.eventId;
-
-        if (!eventId) {
-          console.log("No hay eventId para eliminar");
-          return;
-        }
-
-        const authClient = (await auth.getClient()) as JWT;
-        const calendar = google.calendar({ version: "v3", auth: authClient });
-        
-        await calendar.events.delete({
-          calendarId,
-          eventId,
-        });
-        console.log(`Evento ${eventId} eliminado correctamente.`);
-      } catch (error: any) {
-        console.error(`Error al eliminar el evento:`, error.message);
-        throw new functions.https.HttpsError("internal", error.message ?? "Error desconocido");
-      }
-    }
-  );
+ 
