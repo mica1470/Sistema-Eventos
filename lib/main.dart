@@ -10,7 +10,6 @@ import 'pantallas/reservaspantalla.dart'; // nuevo import
 import 'pantallas/nueva_reserva_pantalla.dart'; // nuevo import
 import 'pantallas/stock_pantalla.dart';
 import 'pantallas/recordatorios_pantalla.dart';
-import 'pantallas/configuracion_pantalla.dart';
 import 'pantallas/calendario_pantalla.dart';
 
 void main() async {
@@ -77,7 +76,6 @@ class EventosInfantilesApp extends StatelessWidget {
         '/recordatorios': (context) => const RecordatoriosPantalla(),
         '/stock': (context) => const StockPantalla(),
         '/calendario': (context) => const CalendarioPantalla(),
-        '/configuracion': (context) => const ConfiguracionPantalla(),
       },
     );
   }

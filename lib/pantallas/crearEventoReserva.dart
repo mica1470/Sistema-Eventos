@@ -1,16 +1,27 @@
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-Future<void> crearEventoCalendario(String reservaId) async {
+Future<void> crearOActualizarEventoCalendario(String reservaId) async {
+  final callable =
+      FirebaseFunctions.instance.httpsCallable('crearEventoCalendario');
+
   try {
-    final callable =
-        FirebaseFunctions.instance.httpsCallable('crearEventoCalendario');
     final result = await callable.call({'reservaId': reservaId});
-    if (result.data['success'] == true) {
-      print("Evento creado con ID: ${result.data['eventId']}");
+    final data = result.data;
+
+    if (data['success'] == true && data['eventId'] != null) {
+      final eventId = data['eventId'];
+      await FirebaseFirestore.instance
+          .collection('reservas')
+          .doc(reservaId)
+          .update({'eventId': eventId});
+
+      print(
+          '✅ Evento ${data['created'] == true ? 'creado' : 'actualizado'} correctamente con ID: $eventId');
     } else {
-      print("Error al crear evento: ${result.data['error']}");
+      print('⚠️ Error al crear/actualizar el evento: ${data['error']}');
     }
   } catch (e) {
-    print("Excepción al llamar función: $e");
+    print('❌ Error llamando la función: $e');
   }
 }

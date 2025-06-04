@@ -521,7 +521,8 @@ class _NuevaReservaPantallaState extends State<NuevaReservaPantalla> {
                               await guardarReserva();
 
                               if (reservaIdGuardado != null) {
-                                await crearEventoCalendario(reservaIdGuardado!);
+                                await crearOActualizarEventoCalendario(
+                                    reservaIdGuardado!);
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(

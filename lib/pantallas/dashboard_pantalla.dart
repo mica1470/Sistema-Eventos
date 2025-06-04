@@ -218,12 +218,6 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
               context: context,
               route: '/recordatorios',
             ),
-            _buildMenuItem(
-              icon: Icons.settings_rounded,
-              text: 'Configuración',
-              context: context,
-              route: '/configuracion',
-            ),
             const Spacer(),
             Padding(
               padding: const EdgeInsets.only(bottom: 24),

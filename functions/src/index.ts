@@ -1,7 +1,10 @@
 // functions/src/index.ts
 import * as functions from "firebase-functions";
+import * as firestoreV1 from "firebase-functions/v1/firestore";
+import { EventContext } from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 import { google } from "googleapis";
+import { JWT } from "google-auth-library";
 
 
 admin.initializeApp();
@@ -12,10 +15,9 @@ const auth = new google.auth.GoogleAuth({
     credentials: require("../credentials/calendar-credentials.json"),
     scopes: ["https://www.googleapis.com/auth/calendar"],
   });
-exports.crearEventoCalendario = functions.https.onCall(
+  exports.crearEventoCalendario = functions.https.onCall(
     async (request: functions.https.CallableRequest<{ reservaId: string }>) => {
       const calendar = google.calendar({ version: "v3", auth });
-  
       const reservaId = request.data.reservaId;
   
       if (!reservaId) {
@@ -23,17 +25,16 @@ exports.crearEventoCalendario = functions.https.onCall(
       }
   
       try {
-        const reservaDoc = await admin.firestore().collection("reservas").doc(reservaId).get();
+        const reservaRef = admin.firestore().collection("reservas").doc(reservaId);
+        const reservaDoc = await reservaRef.get();
   
         if (!reservaDoc.exists) {
-          console.error("Reserva no encontrada con ID:", reservaId);
           return { success: false, error: "Reserva no encontrada" };
         }
   
         const reserva = reservaDoc.data();
   
         if (!reserva) {
-          console.error("Datos de reserva indefinidos");
           return { success: false, error: "Datos de reserva inválidos" };
         }
   
@@ -60,17 +61,66 @@ exports.crearEventoCalendario = functions.https.onCall(
           },
         };
   
-        const response = await calendar.events.insert({
+        let eventId: string | undefined = reserva.eventId;
+  
+        if (eventId) {
+          // Si existe, intentamos actualizar
+          try {
+            const updateResponse = await calendar.events.update({
+              calendarId,
+              eventId,
+              requestBody: evento,
+            });
+            return { success: true, eventId: updateResponse.data.id, updated: true };
+          } catch (error: any) {
+            // Si falla la actualización (por ejemplo si el evento fue eliminado en Google Calendar)
+            console.warn("No se pudo actualizar el evento, se creará uno nuevo:", error.message);
+          }
+        }
+  
+        // Crear nuevo evento
+        const createResponse = await calendar.events.insert({
           calendarId,
           requestBody: evento,
         });
   
-        return { success: true, eventId: response.data.id };
+        eventId = createResponse.data.id ?? undefined;
+  
+        // Guardar el eventId en Firestore
+        await reservaRef.update({ eventId });
+  
+        return { success: true, eventId, created: true };
       } catch (error: any) {
-        console.error("Error al crear evento:", error);
+        console.error("Error al crear/actualizar evento:", error);
         return { success: false, error: error.message ?? "Error desconocido" };
       }
     }
   );
   
-  
+exports.eliminarEventoCalendario = firestoreV1
+  .document("reservas/{reservaId}")
+  .onDelete(
+    async (snap: FirebaseFirestore.DocumentSnapshot, context: EventContext) => {
+      try {
+        const deletedData = snap.data();
+        const eventId = deletedData?.eventId;
+
+        if (!eventId) {
+          console.log("No hay eventId para eliminar");
+          return;
+        }
+
+        const authClient = (await auth.getClient()) as JWT;
+        const calendar = google.calendar({ version: "v3", auth: authClient });
+        
+        await calendar.events.delete({
+          calendarId,
+          eventId,
+        });
+        console.log(`Evento ${eventId} eliminado correctamente.`);
+      } catch (error: any) {
+        console.error(`Error al eliminar el evento:`, error.message);
+        throw new functions.https.HttpsError("internal", error.message ?? "Error desconocido");
+      }
+    }
+  );

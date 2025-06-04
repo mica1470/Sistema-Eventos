@@ -47,6 +47,7 @@ dependencies:
   table_calendar: ^3.0.9
   pdf: ^3.10.1
   cloud_functions: ^4.7.6
+  cupertino_icons: ^1.0.2 # O la versión que uses
 
 dev_dependencies:
   flutter_test:
