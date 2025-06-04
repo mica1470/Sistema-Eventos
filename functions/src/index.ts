@@ -2,6 +2,7 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { google } from "googleapis";
+import * as pubsub from "firebase-functions/v1/pubsub";
 // Inicializa Firebase Admin SDK
 
 admin.initializeApp();
@@ -12,7 +13,8 @@ const auth = new google.auth.GoogleAuth({
     credentials: require("../credentials/calendar-credentials.json"),
     scopes: ["https://www.googleapis.com/auth/calendar"],
   });
-  exports.crearEventoCalendario = functions.https.onCall(
+  
+exports.crearEventoCalendario = functions.https.onCall(
     async (request: functions.https.CallableRequest<{ reservaId: string }>) => {
       const calendar = google.calendar({ version: "v3", auth });
       const reservaId = request.data.reservaId;
@@ -94,3 +96,67 @@ const auth = new google.auth.GoogleAuth({
     }
   );
  
+export const eliminarReservasVencidas = pubsub
+  .schedule('every day 00:00')
+  .timeZone('America/Argentina/Buenos_Aires')
+    .onRun(async () => {
+    const db = admin.firestore();
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0); // Ignora la hora: solo fecha
+  
+    const snapshot = await db.collection('reservas')
+      .where('fecha', '<', hoy.toISOString())
+      .get();
+  
+    const batch = db.batch();
+  
+    snapshot.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+  
+    await batch.commit();
+  
+    console.log(`Reservas vencidas eliminadas: ${snapshot.size}`);
+    return null;
+    });
+
+
+    export const eliminarEventoCalendario = functions.https.onCall(
+      async (request: functions.https.CallableRequest<{ reservaId: string }>) => {
+        const calendar = google.calendar({ version: "v3", auth });
+        const reservaId = request.data.reservaId;
+    
+        if (!reservaId) {
+          return { success: false, error: "Falta el ID de la reserva" };
+        }
+    
+        try {
+          const reservaRef = admin.firestore().collection("reservas").doc(reservaId);
+          const reservaDoc = await reservaRef.get();
+    
+          if (!reservaDoc.exists) {
+            return { success: false, error: "Reserva no encontrada" };
+          }
+    
+          const reserva = reservaDoc.data();
+    
+          if (!reserva || !reserva.eventId) {
+            return { success: false, error: "Evento no encontrado o no existe" };
+          }
+    
+          await calendar.events.delete({
+            calendarId,
+            eventId: reserva.eventId,
+          });
+    
+          // Eliminar eventId del documento Firestore
+          await reservaRef.update({ eventId: admin.firestore.FieldValue.delete() });
+    
+          return { success: true, message: "Evento eliminado correctamente" };
+        } catch (error: any) {
+          console.error("Error al eliminar evento:", error);
+          return { success: false, error: error.message ?? "Error desconocido" };
+        }
+      }
+    );
+    

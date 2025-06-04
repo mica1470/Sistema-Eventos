@@ -1,4 +1,5 @@
 // ignore_for_file: unnecessary_to_list_in_spreads, avoid_web_libraries_in_flutter
+import 'package:eventos_infantiles_web/pantallas/crearEventoReserva.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -644,9 +645,9 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
           return [
             pw.Text(
               'Listado de Reservas',
-              style: pw.TextStyle(font: poppinsBold, fontSize: 24),
+              style: pw.TextStyle(font: poppinsBold, fontSize: 20),
             ),
-            pw.SizedBox(height: 22),
+            pw.SizedBox(height: 20),
             ...reservas.map((reserva) {
               DateTime fecha;
               final dynamic fechaRaw = reserva['fecha'];
@@ -660,102 +661,111 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
 
               final horario = DateFormat.Hm().format(fecha);
 
-              return pw.Container(
-                margin: const pw.EdgeInsets.only(bottom: 12),
-                padding: const pw.EdgeInsets.all(14),
-                decoration: pw.BoxDecoration(
-                  color: PdfColors.grey100,
-                  border: pw.Border.all(color: PdfColors.grey400),
-                  borderRadius: pw.BorderRadius.circular(10),
-                ),
-                child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Text(
-                      'Cumpleañero/a: ${reserva['cliente'] ?? ''}',
-                      style: pw.TextStyle(
-                        font: poppinsBold,
-                        fontSize: 16,
-                        fontFallback: [emojiFont],
-                      ),
+              return pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Container(
+                    margin: const pw.EdgeInsets.only(bottom: 5),
+                    padding: const pw.EdgeInsets.all(10),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColors.grey100,
+                      border: pw.Border.all(color: PdfColors.grey400),
+                      borderRadius: pw.BorderRadius.circular(10),
                     ),
-                    pw.SizedBox(height: 6),
-                    pw.Text('Fecha: ${DateFormat('dd/MM/yyyy').format(fecha)}',
-                        style: pw.TextStyle(
-                          font: poppinsRegular,
-                          fontSize: 12,
-                          fontFallback: [emojiFont],
-                        )),
-                    pw.Text('Horario: $horario',
-                        style: pw.TextStyle(
-                          font: poppinsRegular,
-                          fontSize: 12,
-                          fontFallback: [emojiFont],
-                        )),
-                    pw.Text(
-                        'Adulto Responsable: ${reserva['adultoResponsable'] ?? ''}',
-                        style: pw.TextStyle(
-                          font: poppinsRegular,
-                          fontSize: 12,
-                          fontFallback: [emojiFont],
-                        )),
-                    pw.Text('Teléfono: ${reserva['telefono'] ?? ''}',
-                        style: pw.TextStyle(
-                          font: poppinsRegular,
-                          fontSize: 12,
-                          fontFallback: [emojiFont],
-                        )),
-                    pw.Text(
-                        'Cantidad de Niños: ${reserva['cantidadNinos'] ?? '-'} | Adultos: ${reserva['cantidadAdultos'] ?? '-'}',
-                        style: pw.TextStyle(
-                          font: poppinsRegular,
-                          fontSize: 12,
-                          fontFallback: [emojiFont],
-                        )),
-                    pw.Text(
-                        'Combo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? '-'}  | Cantidad: ${reserva['cantidadLunchAdultos'] ?? '0'}',
-                        style: pw.TextStyle(
-                          font: poppinsRegular,
-                          fontSize: 12,
-                          fontFallback: [emojiFont],
-                        )),
-                    pw.Text(
-                        'Combo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? '-'}  | Cantidad: ${reserva['cantidadDulceAdultos'] ?? '0'}',
-                        style: pw.TextStyle(
-                          font: poppinsRegular,
-                          fontSize: 12,
-                          fontFallback: [emojiFont],
-                        )),
-                    pw.Text('Piñata: ${reserva['pinata'] ?? 'No'}',
-                        style: pw.TextStyle(
-                          font: poppinsRegular,
-                          fontSize: 12,
-                          fontFallback: [emojiFont],
-                        )),
-                    pw.Text('Estado de pago: ${reserva['estadoPago'] ?? ''}',
-                        style: pw.TextStyle(
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text(
+                          'Cumpleañero/a: ${reserva['cliente'] ?? ''}',
+                          style: pw.TextStyle(
                             font: poppinsBold,
-                            fontSize: 12,
+                            fontSize: 13,
                             fontFallback: [emojiFont],
-                            color: PdfColors.green800)),
-                    pw.Text('Importe: ${reserva['importe'] ?? ''}',
-                        style: pw.TextStyle(
-                            font: poppinsBold,
-                            fontSize: 12,
-                            fontFallback: [emojiFont])),
-                    pw.Text('Descripcion de pago: ${reserva['pagos'] ?? ''}',
-                        style: pw.TextStyle(
-                            font: poppinsBold,
-                            fontSize: 12,
-                            fontFallback: [emojiFont])),
-                    pw.Text(
-                        'Solicitud Especial: ${(reserva['solicitudEspecial'] == null || reserva['solicitudEspecial'].toString().trim().isEmpty) ? 'Ninguna' : reserva['solicitudEspecial']}',
-                        style: pw.TextStyle(
-                          font: poppinsRegular,
-                          fontSize: 12,
-                        )),
-                  ],
-                ),
+                          ),
+                        ),
+                        pw.SizedBox(height: 6),
+                        pw.Text(
+                            'Fecha: ${DateFormat('dd/MM/yyyy').format(fecha)}',
+                            style: pw.TextStyle(
+                              font: poppinsBold,
+                              fontSize: 11,
+                              fontFallback: [emojiFont],
+                            )),
+                        pw.Text('Horario: $horario',
+                            style: pw.TextStyle(
+                              font: poppinsBold,
+                              fontSize: 11,
+                              fontFallback: [emojiFont],
+                            )),
+                        pw.Text(
+                            'Adulto Responsable: ${reserva['adultoResponsable'] ?? ''}',
+                            style: pw.TextStyle(
+                              font: poppinsBold,
+                              fontSize: 11,
+                              fontFallback: [emojiFont],
+                            )),
+                        pw.Text('Teléfono: ${reserva['telefono'] ?? ''}',
+                            style: pw.TextStyle(
+                              font: poppinsRegular,
+                              fontSize: 11,
+                              fontFallback: [emojiFont],
+                            )),
+                        pw.Text(
+                            'Cantidad de Niños: ${reserva['cantidadNinos'] ?? '-'} | Adultos: ${reserva['cantidadAdultos'] ?? '-'}',
+                            style: pw.TextStyle(
+                              font: poppinsRegular,
+                              fontSize: 11,
+                              fontFallback: [emojiFont],
+                            )),
+                        pw.Text(
+                            'Combo Lunch Adultos: ${reserva['comboLunchAdultos'] ?? '-'}  | Cantidad: ${reserva['cantidadLunchAdultos'] ?? '0'}',
+                            style: pw.TextStyle(
+                              font: poppinsRegular,
+                              fontSize: 11,
+                              fontFallback: [emojiFont],
+                            )),
+                        pw.Text(
+                            'Combo Dulce Adultos: ${reserva['comboDulceAdultos'] ?? '-'}  | Cantidad: ${reserva['cantidadDulceAdultos'] ?? '0'}',
+                            style: pw.TextStyle(
+                              font: poppinsRegular,
+                              fontSize: 11,
+                              fontFallback: [emojiFont],
+                            )),
+                        pw.Text('Piñata: ${reserva['pinata'] ?? 'No'}',
+                            style: pw.TextStyle(
+                              font: poppinsRegular,
+                              fontSize: 11,
+                              fontFallback: [emojiFont],
+                            )),
+                        pw.Text(
+                            'Estado de pago: ${reserva['estadoPago'] ?? ''}',
+                            style: pw.TextStyle(
+                                font: poppinsBold,
+                                fontSize: 11,
+                                fontFallback: [emojiFont],
+                                color: PdfColors.green800)),
+                        pw.Text('Importe: ${reserva['importe'] ?? ''}',
+                            style: pw.TextStyle(
+                                font: poppinsRegular,
+                                fontSize: 11,
+                                fontFallback: [emojiFont])),
+                        pw.Text(
+                            'Descripcion de pago: ${reserva['pagos'] ?? ''}',
+                            style: pw.TextStyle(
+                                font: poppinsRegular,
+                                fontSize: 11,
+                                fontFallback: [emojiFont])),
+                        pw.Text(
+                            'Solicitud Especial: ${(reserva['solicitudEspecial'] == null || reserva['solicitudEspecial'].toString().trim().isEmpty) ? 'Ninguna' : reserva['solicitudEspecial']}',
+                            style: pw.TextStyle(
+                              font: poppinsRegular,
+                              fontSize: 11,
+                            )),
+                      ],
+                    ),
+                  ),
+                  pw.SizedBox(height: 12),
+                ],
               );
             }).toList(),
           ];
@@ -843,6 +853,7 @@ class _DashboardPantallaState extends State<DashboardPantalla> {
                 if (!mounted) return;
 
                 if (confirmar == true) {
+                  await eliminarEventoCalendario(id);
                   await FirebaseFirestore.instance
                       .collection('reservas')
                       .doc(id)

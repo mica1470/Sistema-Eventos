@@ -14,6 +14,24 @@ class RecordatoriosPantalla extends StatefulWidget {
 class _RecordatoriosPantallaState extends State<RecordatoriosPantalla> {
   // Mapa para almacenar recordatorios borrados temporalmente
   final Map<String, Map<String, dynamic>> borradosRecientemente = {};
+  void mostrarNotificacionProximas(List<QueryDocumentSnapshot> docs) {
+    if (docs.isEmpty) return;
+
+    final cantidad = docs.length;
+    final mensaje = cantidad == 1
+        ? 'Tienes 1 reserva próxima a vencer.'
+        : 'Tienes $cantidad reservas próximas a vencer.';
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensaje),
+        duration: const Duration(seconds: 4),
+        backgroundColor: const Color.fromARGB(167, 255, 107, 129),
+      ),
+    );
+  }
 
   // Método para recalcular recordatorios próximos (3 días)
   Future<void> recalcularRecordatorios() async {
@@ -24,6 +42,8 @@ class _RecordatoriosPantallaState extends State<RecordatoriosPantalla> {
         .collection('reservas')
         .orderBy('fecha')
         .get();
+
+    List<QueryDocumentSnapshot> proximas = [];
 
     for (var doc in snapshot.docs) {
       final data = doc.data();
@@ -37,14 +57,13 @@ class _RecordatoriosPantallaState extends State<RecordatoriosPantalla> {
             .collection('recordatorios')
             .doc(doc.id)
             .set(data);
+        proximas.add(doc);
       }
     }
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Recordatorios actualizados')),
-    );
+    mostrarNotificacionProximas(proximas); // Mostrar notificación
   }
 
   // Método para eliminar un recordatorio
@@ -92,6 +111,12 @@ class _RecordatoriosPantallaState extends State<RecordatoriosPantalla> {
     final fecha = DateTime.tryParse(fechaStr);
     if (fecha == null) return 'Fecha inválida';
     return DateFormat('dd/MM/yyyy – kk:mm').format(fecha);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    recalcularRecordatorios(); // Verifica al iniciar la pantalla
   }
 
   @override
